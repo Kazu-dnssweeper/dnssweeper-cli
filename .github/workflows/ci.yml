@@ -7,6 +7,39 @@ on:
     branches: [ main, master, develop ]
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build project
+      run: npm run build
+    
+    - name: Run tests
+      run: npm test -- --passWithNoTests --ci --coverage --forceExit
+    
+    - name: Upload coverage reports
+      if: matrix.node-version == '18.x'
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+
   quality-check:
     runs-on: ubuntu-latest
     
@@ -56,3 +89,13 @@ jobs:
     
     - name: Run security audit
       run: npm audit --audit-level=high
+    
+    - name: Run dependency check
+      uses: dependency-check/Dependency-Check_Action@main
+      with:
+        project: 'dnssweeper-cli'
+        path: '.'
+        format: 'HTML'
+        args: >
+          --enableRetired
+          --enableExperimental

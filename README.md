@@ -1,10 +1,12 @@
 # 🔍 DNSweeper CLI
 
-[![Test](https://github.com/dnssweeper/dnssweeper-cli/workflows/Test/badge.svg)](https://github.com/dnssweeper/dnssweeper-cli/actions?query=workflow%3ATest)
-[![CI](https://github.com/dnssweeper/dnssweeper-cli/workflows/CI/badge.svg)](https://github.com/dnssweeper/dnssweeper-cli/actions?query=workflow%3ACI)
+[![Test](https://github.com/Kazu-dnssweeper/dnssweeper-cli/workflows/Test/badge.svg)](https://github.com/Kazu-dnssweeper/dnssweeper-cli/actions?query=workflow%3ATest)
+[![CI](https://github.com/Kazu-dnssweeper/dnssweeper-cli/workflows/CI/badge.svg)](https://github.com/Kazu-dnssweeper/dnssweeper-cli/actions?query=workflow%3ACI)
 [![npm version](https://img.shields.io/npm/v/dnssweeper-cli.svg)](https://www.npmjs.com/package/dnssweeper-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/node/v/dnssweeper-cli.svg)](https://nodejs.org/)
+[![Security Policy](https://img.shields.io/badge/Security-Policy-blue.svg)](SECURITY.md)
+[![Claude Code](https://img.shields.io/badge/AI-Claude%20Code-purple.svg)](.github/workflows/claude-code-action.yml)
 
 未使用のDNSレコードを検出・分析するコマンドラインツール
 

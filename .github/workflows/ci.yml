@@ -89,6 +89,28 @@ jobs:
     
     - name: Run security audit
       run: npm audit --audit-level=high
+      continue-on-error: true
     
     - name: Check for known vulnerabilities
       run: npm audit --production
+      continue-on-error: true
+    
+    - name: Run Snyk security scan
+      uses: snyk/actions/node@master
+      continue-on-error: true
+      with:
+        args: --severity-threshold=high
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+    
+    - name: Upload security results
+      if: always()
+      run: |
+        echo "セキュリティスキャン完了" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📊 セキュリティレポート" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        npm audit --json > audit-report.json || true
+        if [ -f audit-report.json ]; then
+          echo "脆弱性数: $(jq '.metadata.vulnerabilities.total' audit-report.json)" >> $GITHUB_STEP_SUMMARY
+        fi

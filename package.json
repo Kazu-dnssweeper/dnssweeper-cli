@@ -18,6 +18,7 @@
     "type-check": "tsc --noEmit",
     "format": "prettier --write src/**/*.ts",
     "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
     "pre-commit": "npm run type-check && npm run lint && npm run test",
     "prepublishOnly": "echo '\\n🚨 npm公開前最終確認: チェックリストをすべて満たしているか？\\n' && npm run build && npm test",
     "check-session": "node scripts/session-check.js",
@@ -25,7 +26,12 @@
     "check-context": "node scripts/session-check.js check-context",
     "release": "node scripts/release.js",
     "fix-ci": "node scripts/fix-ci.js",
-    "status": "node scripts/status.js"
+    "status": "node scripts/status.js",
+    "audit:fix": "npm audit fix --force",
+    "clean": "rm -rf dist coverage node_modules package-lock.json && npm install",
+    "verify": "npm run type-check && npm run lint && npm run test:fast && npm run build && npm pack --dry-run",
+    "quality-check": "echo '\\n🚨 DNSweeper 品質チェック開始\\n' && npm run type-check && npm run lint && npm test",
+    "quality-check:fix": "npm run lint:fix && npm run format && npm run quality-check"
   },
   "keywords": [
     "dns",
@@ -57,9 +63,9 @@
   "homepage": "https://github.com/dnssweeper/dnssweeper-cli#readme",
   "license": "MIT",
   "dependencies": {
-    "chalk": "^5.0.0",
+    "chalk": "^4.1.2",
     "commander": "^11.1.0",
-    "ora": "^7.0.0",
+    "ora": "^5.4.1",
     "papaparse": "^5.0.0"
   },
   "devDependencies": {

@@ -45,6 +45,8 @@ module.exports = {
   forceExit: true,
   // オープンハンドルの検出
   detectOpenHandles: false,
+  // 最初のエラーで停止（高速化）
+  bail: 1,
   // コンソール出力を抑制
   silent: false,
   // キャッシュ無効化（WSL環境での問題回避）

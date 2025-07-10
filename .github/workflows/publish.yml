@@ -31,11 +31,11 @@ jobs:
     - name: Install dependencies
       run: npm ci
     
-    - name: Run tests
-      run: npm test -- --passWithNoTests --ci --coverage
-    
     - name: Build project
       run: npm run build
+    
+    - name: Run tests
+      run: npm test -- --passWithNoTests --ci --coverage
     
     - name: Update version (if manual trigger)
       if: github.event_name == 'workflow_dispatch'

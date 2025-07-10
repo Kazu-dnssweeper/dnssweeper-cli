@@ -70,3 +70,6 @@ pids
 
 # Optional eslint cache
 .eslintcache
+
+# Issue監視
+.last-issue-check

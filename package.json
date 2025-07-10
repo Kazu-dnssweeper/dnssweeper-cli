@@ -31,7 +31,13 @@
     "clean": "rm -rf dist coverage node_modules package-lock.json && npm install",
     "verify": "npm run type-check && npm run lint && npm run test:fast && npm run build && npm pack --dry-run",
     "quality-check": "echo '\\n🚨 DNSweeper 品質チェック開始\\n' && npm run type-check && npm run lint && npm test",
-    "quality-check:fix": "npm run lint:fix && npm run format && npm run quality-check"
+    "quality-check:fix": "npm run lint:fix && npm run format && npm run quality-check",
+    "watch:issues": "bash scripts/watch-issues.sh",
+    "issues": "gh issue list --state open",
+    "issue:create": "gh issue create",
+    "issues:open": "node scripts/github-utils/get-open-issues.js",
+    "pr:status": "node scripts/github-utils/check-pr-status.js",
+    "issue:label": "node scripts/github-utils/auto-label-issues.js"
   },
   "keywords": [
     "dns",

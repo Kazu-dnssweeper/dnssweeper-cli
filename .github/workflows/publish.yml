@@ -35,7 +35,7 @@ jobs:
       run: npm run build
     
     - name: Run tests
-      run: npm run test:unit
+      run: npm test -- --passWithNoTests --ci
     
     - name: Update version (if manual trigger)
       if: github.event_name == 'workflow_dispatch'

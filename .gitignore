@@ -1,0 +1,72 @@
+# 依存関係
+node_modules/
+
+# ビルド出力
+dist/
+build/
+
+# ログファイル
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 環境変数
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# テストカバレッジ
+coverage/
+
+# IDE設定
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS固有
+.DS_Store
+Thumbs.db
+
+# 一時ファイル
+*.tmp
+*.temp
+
+# パッケージファイル
+*.tgz
+*.tar.gz
+
+# TypeScript
+*.tsbuildinfo
+
+# Claude Code設定（ローカル）
+.claude/settings.local.json
+.claude.json
+
+# セキュリティ
+*.pem
+*.key
+*.cert
+
+# npm publish
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache

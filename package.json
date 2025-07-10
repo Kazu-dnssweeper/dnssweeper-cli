@@ -1,0 +1,75 @@
+{
+  "name": "dnssweeper-cli",
+  "version": "0.1.0",
+  "description": "CLI tool for detecting and analyzing unused DNS records",
+  "main": "dist/index.js",
+  "bin": {
+    "dnssweeper": "dist/index.js"
+  },
+  "scripts": {
+    "predev": "echo '\\n⚠️  品質基準確認: 開発ルール.mdのエラーゼロ原則を必ず守ること\\n'",
+    "dev": "ts-node src/index.ts",
+    "prebuild": "echo '\\n⚠️  ビルド前確認: すべてのエラー・警告を解消したか？\\n'",
+    "build": "tsc",
+    "pretest": "echo '\\n⚠️  テストは必ず完走させること（タイムアウト厳禁）\\n'",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "test:fast": "jest --passWithNoTests",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write src/**/*.ts",
+    "lint": "eslint src/**/*.ts",
+    "pre-commit": "npm run type-check && npm run lint && npm run test",
+    "prepublishOnly": "echo '\\n🚨 npm公開前最終確認: チェックリストをすべて満たしているか？\\n' && npm run build && npm test",
+    "check-session": "node scripts/session-check.js",
+    "check-rules": "node scripts/session-check.js check-rules",
+    "check-context": "node scripts/session-check.js check-context"
+  },
+  "keywords": [
+    "dns",
+    "cloudflare",
+    "cli",
+    "dns-records",
+    "analysis",
+    "cleanup",
+    "security",
+    "typescript"
+  ],
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "files": [
+    "dist",
+    "patterns.json",
+    "LICENSE",
+    "README.md"
+  ],
+  "author": "DNSweeper Team",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dnssweeper/dnssweeper-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dnssweeper/dnssweeper-cli/issues"
+  },
+  "homepage": "https://github.com/dnssweeper/dnssweeper-cli#readme",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.0.0",
+    "commander": "^11.1.0",
+    "ora": "^7.0.0",
+    "papaparse": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.0.0",
+    "@types/node": "^20.0.0",
+    "@types/papaparse": "^5.3.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.0.0",
+    "jest": "^29.0.0",
+    "prettier": "^3.0.0",
+    "ts-jest": "^29.0.0",
+    "ts-node": "^10.0.0",
+    "typescript": "^5.0.0"
+  }
+}

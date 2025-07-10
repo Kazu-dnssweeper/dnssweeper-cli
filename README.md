@@ -6,7 +6,6 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/node/v/dnssweeper-cli.svg)](https://nodejs.org/)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-blue.svg)](SECURITY.md)
-[![Claude Code](https://img.shields.io/badge/AI-Claude%20Code-purple.svg)](.github/workflows/claude-code-action.yml)
 
 未使用のDNSレコードを検出・分析するコマンドラインツール
 

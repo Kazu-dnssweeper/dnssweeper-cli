@@ -1,4 +1,0 @@
-Name,Type,Content,TTL,Proxied,Created,Modified
-example.com,A,192.168.1.1,300,true,2023-01-15T10:00:00Z,2024-12-01T15:30:00Z
-old-api.example.com,A,192.168.1.10,300,false,2022-05-10T09:00:00Z,2023-02-10T10:00:00Z
-test-server.example.com,A,192.168.1.20,300,false,2023-08-15T11:30:00Z,2023-08-15T11:30:00Z

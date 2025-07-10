@@ -22,7 +22,10 @@
     "prepublishOnly": "echo '\\n🚨 npm公開前最終確認: チェックリストをすべて満たしているか？\\n' && npm run build && npm test",
     "check-session": "node scripts/session-check.js",
     "check-rules": "node scripts/session-check.js check-rules",
-    "check-context": "node scripts/session-check.js check-context"
+    "check-context": "node scripts/session-check.js check-context",
+    "release": "node scripts/release.js",
+    "fix-ci": "node scripts/fix-ci.js",
+    "status": "node scripts/status.js"
   },
   "keywords": [
     "dns",

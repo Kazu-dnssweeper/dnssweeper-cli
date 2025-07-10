@@ -41,7 +41,16 @@ export async function analyzeCommand(
   const language = options.english ? 'en' : 'ja';
   const messages = getMessages(language);
 
-  const spinner = ora(messages.app.analyzing).start();
+  // CI環境ではスピナーを無効化（stderrへの出力を防ぐ）
+  const isCI = process.env.CI === 'true' || process.env.NODE_ENV === 'test';
+  const spinner = isCI 
+    ? { 
+      start: () => ({ text: '', succeed: () => {}, fail: () => {} }), 
+      text: '',
+      succeed: () => {},
+      fail: () => {},
+    }
+    : ora(messages.app.analyzing).start();
 
   try {
     // 実行時間の計測開始
@@ -52,20 +61,26 @@ export async function analyzeCommand(
     console.log(chalk.gray(`${messages.app.outputFormat}: ${options.output}`));
 
     // パターン設定の読み込み
-    spinner.text =
-      language === 'ja'
-        ? 'パターン設定を読み込み中...'
-        : 'Loading pattern configuration...';
+    if (!isCI) {
+      spinner.text =
+        language === 'ja'
+          ? 'パターン設定を読み込み中...'
+          : 'Loading pattern configuration...';
+    }
     const patternConfig = await loadPatternConfig();
 
     // CSVファイルの解析
-    spinner.text =
-      language === 'ja' ? 'CSVファイルを解析中...' : 'Parsing CSV file...';
+    if (!isCI) {
+      spinner.text =
+        language === 'ja' ? 'CSVファイルを解析中...' : 'Parsing CSV file...';
+    }
     const records = await parseDNSRecordsFromCSV(file);
 
     // DNSレコードの分析
-    spinner.text =
-      language === 'ja' ? 'DNSレコードを分析中...' : 'Analyzing DNS records...';
+    if (!isCI) {
+      spinner.text =
+        language === 'ja' ? 'DNSレコードを分析中...' : 'Analyzing DNS records...';
+    }
     const analysisResults = analyzeRecords(records, patternConfig, language);
 
     // 結果をリスクスコア順でソート
@@ -74,14 +89,18 @@ export async function analyzeCommand(
     // リスクレベルでフィルタリング
     if (options.riskLevel) {
       sortedResults = filterByRiskLevel(sortedResults, options.riskLevel);
-      if (language === 'ja') {
-        spinner.text = `${options.riskLevel}以上のリスクレコードをフィルタリング中...`;
-      } else {
-        spinner.text = `Filtering ${options.riskLevel}+ risk records...`;
+      if (!isCI) {
+        if (language === 'ja') {
+          spinner.text = `${options.riskLevel}以上のリスクレコードをフィルタリング中...`;
+        } else {
+          spinner.text = `Filtering ${options.riskLevel}+ risk records...`;
+        }
       }
     }
 
-    spinner.succeed(messages.app.analysisComplete);
+    if (!isCI) {
+      spinner.succeed(messages.app.analysisComplete);
+    }
 
     // 実行時間の計算
     const endTime = Date.now();
@@ -132,7 +151,9 @@ export async function analyzeCommand(
     }
     }
   } catch (error) {
-    spinner.fail(messages.errors.analysisFailure);
+    if (!isCI) {
+      spinner.fail(messages.errors.analysisFailure);
+    }
     throw error;
   }
 }

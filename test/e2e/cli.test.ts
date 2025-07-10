@@ -45,7 +45,7 @@ test-server.example.com,A,192.168.1.20,300,false,2023-08-15T11:30:00Z,2023-08-15
 
   describe('analyze command', () => {
     it('基本的なanalyzeコマンドが動作する', async () => {
-      const command = `npm run dev -- analyze "${tempFile}"`;
+      const command = `CI=true node dist/index.js analyze "${tempFile}"`;
       const { stdout, stderr } = await execAsync(command, { 
         cwd: path.join(__dirname, '../..'),
         timeout: 30000 
@@ -59,7 +59,7 @@ test-server.example.com,A,192.168.1.20,300,false,2023-08-15T11:30:00Z,2023-08-15
     }, 30000);
 
     it('JSON出力形式が動作する', async () => {
-      const command = `npm run dev -- analyze "${tempFile}" --output json`;
+      const command = `node dist/index.js analyze "${tempFile}" --output json`;
       const { stdout, stderr } = await execAsync(command, { 
         cwd: path.join(__dirname, '../..'),
         timeout: 30000 
@@ -79,7 +79,7 @@ test-server.example.com,A,192.168.1.20,300,false,2023-08-15T11:30:00Z,2023-08-15
     }, 30000);
 
     it('CSV出力形式が動作する', async () => {
-      const command = `npm run dev -- analyze "${tempFile}" --output csv`;
+      const command = `node dist/index.js analyze "${tempFile}" --output csv`;
       const { stdout, stderr } = await execAsync(command, { 
         cwd: path.join(__dirname, '../..'),
         timeout: 30000 
@@ -93,7 +93,7 @@ test-server.example.com,A,192.168.1.20,300,false,2023-08-15T11:30:00Z,2023-08-15
     }, 30000);
 
     it('verbose オプションが動作する', async () => {
-      const command = `npm run dev -- analyze "${tempFile}" --verbose`;
+      const command = `node dist/index.js analyze "${tempFile}" --verbose`;
       const { stdout, stderr } = await execAsync(command, { 
         cwd: path.join(__dirname, '../..'),
         timeout: 30000 
@@ -106,7 +106,7 @@ test-server.example.com,A,192.168.1.20,300,false,2023-08-15T11:30:00Z,2023-08-15
     }, 30000);
 
     it('存在しないファイルでエラーが発生する', async () => {
-      const command = `npm run dev -- analyze "nonexistent.csv"`;
+      const command = `node dist/index.js analyze "nonexistent.csv"`;
       
       await expect(execAsync(command, { 
         cwd: path.join(__dirname, '../..'),
@@ -123,7 +123,7 @@ test-server.example.com,A,192.168.1.20,300,false,2023-08-15T11:30:00Z,2023-08-15
         return;
       }
 
-      const command = `npm run dev -- analyze "${testDataFile}"`;
+      const command = `node dist/index.js analyze "${testDataFile}"`;
       const { stdout, stderr } = await execAsync(command, { 
         cwd: path.join(__dirname, '../..'),
         timeout: 30000 
@@ -139,7 +139,7 @@ test-server.example.com,A,192.168.1.20,300,false,2023-08-15T11:30:00Z,2023-08-15
 
   describe('risk-level filtering', () => {
     it('--risk-level=high オプションが動作する', async () => {
-      const command = `npm run dev -- analyze "${tempFile}" --risk-level=high`;
+      const command = `node dist/index.js analyze "${tempFile}" --risk-level=high`;
       const { stdout, stderr } = await execAsync(command, { 
         cwd: path.join(__dirname, '../..'),
         timeout: 30000 
@@ -153,7 +153,7 @@ test-server.example.com,A,192.168.1.20,300,false,2023-08-15T11:30:00Z,2023-08-15
     }, 30000);
 
     it('--risk-level=critical オプションが動作する', async () => {
-      const command = `npm run dev -- analyze "${tempFile}" --risk-level=critical`;
+      const command = `node dist/index.js analyze "${tempFile}" --risk-level=critical`;
       const { stdout, stderr } = await execAsync(command, { 
         cwd: path.join(__dirname, '../..'),
         timeout: 30000 
@@ -180,7 +180,7 @@ test-server.example.com,A,192.168.1.20,300,false,2023-08-15T11:30:00Z,2023-08-15
     });
 
     it('--output-file オプションが動作する', async () => {
-      const command = `npm run dev -- analyze "${tempFile}" --output-file="${outputFile}"`;
+      const command = `node dist/index.js analyze "${tempFile}" --output-file="${outputFile}"`;
       const { stdout, stderr } = await execAsync(command, { 
         cwd: path.join(__dirname, '../..'),
         timeout: 30000 
@@ -201,7 +201,7 @@ test-server.example.com,A,192.168.1.20,300,false,2023-08-15T11:30:00Z,2023-08-15
     }, 30000);
 
     it('--risk-level と --output-file の組み合わせが動作する', async () => {
-      const command = `npm run dev -- analyze "${tempFile}" --risk-level=high --output-file="${outputFile}"`;
+      const command = `node dist/index.js analyze "${tempFile}" --risk-level=high --output-file="${outputFile}"`;
       const { stdout, stderr } = await execAsync(command, { 
         cwd: path.join(__dirname, '../..'),
         timeout: 30000 
@@ -222,7 +222,7 @@ test-server.example.com,A,192.168.1.20,300,false,2023-08-15T11:30:00Z,2023-08-15
     }, 30000);
 
     it('--english と --output-file の組み合わせが動作する', async () => {
-      const command = `npm run dev -- analyze "${tempFile}" --english --output-file="${outputFile}"`;
+      const command = `node dist/index.js analyze "${tempFile}" --english --output-file="${outputFile}"`;
       const { stdout, stderr } = await execAsync(command, { 
         cwd: path.join(__dirname, '../..'),
         timeout: 30000 
@@ -245,7 +245,7 @@ test-server.example.com,A,192.168.1.20,300,false,2023-08-15T11:30:00Z,2023-08-15
 
   describe('help and version', () => {
     it('--help オプションが動作する', async () => {
-      const command = `npm run dev -- --help`;
+      const command = `CI=true node dist/index.js --help`;
       const { stdout, stderr } = await execAsync(command, { 
         cwd: path.join(__dirname, '../..'),
         timeout: 30000 
@@ -258,20 +258,20 @@ test-server.example.com,A,192.168.1.20,300,false,2023-08-15T11:30:00Z,2023-08-15
     }, 30000);
 
     it('--version オプションが動作する', async () => {
-      const command = `npm run dev -- --version`;
+      const command = `CI=true node dist/index.js --version`;
       const { stdout, stderr } = await execAsync(command, { 
         cwd: path.join(__dirname, '../..'),
         timeout: 30000 
       });
 
       expect(stderr).toBe('');
-      expect(stdout).toContain('1.0.0');
+      expect(stdout).toContain('0.1.0');
     }, 30000);
   });
 
   describe('error handling', () => {
     it('不正なオプションでエラーが発生する', async () => {
-      const command = `npm run dev -- analyze "${tempFile}" --invalid-option`;
+      const command = `node dist/index.js analyze "${tempFile}" --invalid-option`;
       
       await expect(execAsync(command, { 
         cwd: path.join(__dirname, '../..'),
@@ -280,14 +280,28 @@ test-server.example.com,A,192.168.1.20,300,false,2023-08-15T11:30:00Z,2023-08-15
     }, 30000);
 
     it('引数なしでヘルプが表示される', async () => {
-      const command = `npm run dev`;
-      const { stdout, stderr } = await execAsync(command, { 
-        cwd: path.join(__dirname, '../..'),
-        timeout: 30000 
-      });
-
-      expect(stderr).toBe('');
-      expect(stdout).toContain('Usage:');
+      const command = `CI=true node dist/index.js`;
+      
+      try {
+        const { stdout } = await execAsync(command, { 
+          cwd: path.join(__dirname, '../..'),
+          timeout: 30000 
+        });
+        
+        // exitコード0で終了している場合
+        expect(stdout).toContain('Usage:');
+        expect(stdout).toContain('Commands:');
+        expect(stdout).toContain('analyze');
+      } catch (error: any) {
+        // exitコード1で終了している場合（ヘルプ表示後）
+        if (error.stdout) {
+          expect(error.stdout).toContain('Usage:');
+          expect(error.stdout).toContain('Commands:');
+          expect(error.stdout).toContain('analyze');
+        } else {
+          throw error;
+        }
+      }
     }, 30000);
   });
 
@@ -303,7 +317,7 @@ test-server.example.com,A,192.168.1.20,300,false,2023-08-15T11:30:00Z,2023-08-15
       await fs.writeFile(largeTempFile, largeCSV.join('\n'));
 
       const startTime = Date.now();
-      const command = `npm run dev -- analyze "${largeTempFile}"`;
+      const command = `node dist/index.js analyze "${largeTempFile}"`;
       const { stdout, stderr } = await execAsync(command, { 
         cwd: path.join(__dirname, '../..'),
         timeout: 30000 

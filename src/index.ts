@@ -33,6 +33,12 @@ async function main(): Promise<void> {
       .option('-f, --output-file <file>', '分析結果を運用フロー対応CSVファイルに出力（月次DNS棚卸し用）')
       .action(analyzeCommand);
 
+    // 引数なしで実行された場合、ヘルプを表示して正常終了
+    if (process.argv.length === 2) {
+      program.outputHelp();
+      process.exit(0);
+    }
+    
     // コマンドラインの解析と実行
     await program.parseAsync(process.argv);
   } catch (error) {

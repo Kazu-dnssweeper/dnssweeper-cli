@@ -1,0 +1,96 @@
+name: Publish to npm
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g., 1.0.0)'
+        required: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # 全履歴を取得（CHANGELOG生成用）
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18
+        registry-url: 'https://registry.npmjs.org'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run tests
+      run: npm test -- --passWithNoTests --ci --coverage=false --forceExit
+    
+    - name: Build
+      run: npm run build
+    
+    - name: Generate CHANGELOG
+      run: |
+        echo "# Changelog" > CHANGELOG.md
+        echo "" >> CHANGELOG.md
+        
+        # 最新のタグを取得
+        LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+        
+        if [ -z "$LATEST_TAG" ]; then
+          echo "## Initial Release" >> CHANGELOG.md
+          git log --pretty=format:"- %s" >> CHANGELOG.md
+        else
+          echo "## ${{ github.ref_name }}" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          git log ${LATEST_TAG}..HEAD --pretty=format:"- %s" >> CHANGELOG.md
+        fi
+        
+        echo "" >> CHANGELOG.md
+        echo "---" >> CHANGELOG.md
+        echo "Generated on $(date)" >> CHANGELOG.md
+    
+    - name: Update version
+      if: github.event_name == 'workflow_dispatch'
+      run: |
+        npm version ${{ github.event.inputs.version }} --no-git-tag-version
+        VERSION=${{ github.event.inputs.version }}
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git add package.json package-lock.json
+        git commit -m "chore: bump version to ${VERSION}"
+        git tag -a "v${VERSION}" -m "Release version ${VERSION}"
+        git push origin main --tags
+    
+    - name: Publish to npm
+      run: npm publish --access public
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    
+    - name: Create GitHub Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref_name }}
+        release_name: Release ${{ github.ref_name }}
+        body_path: CHANGELOG.md
+        draft: false
+        prerelease: false
+    
+    - name: Upload Release Assets
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./dnssweeper-cli-*.tgz
+        asset_name: dnssweeper-cli-${{ github.ref_name }}.tgz
+        asset_content_type: application/gzip

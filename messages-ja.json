@@ -1,0 +1,32 @@
+{
+  "analysis": {
+    "title": "分析結果サマリー",
+    "totalRecords": "総レコード数",
+    "processingTime": "処理時間",
+    "riskDistribution": "リスク分布",
+    "highRiskRecords": "高リスクレコード（上位%d件）",
+    "noHighRisk": "高リスクレコードはありません"
+  },
+  "risk": {
+    "critical": "クリティカル",
+    "high": "高リスク",
+    "medium": "中リスク",
+    "low": "低リスク",
+    "safe": "安全"
+  },
+  "table": {
+    "title": "詳細分析結果",
+    "recordName": "レコード名",
+    "type": "タイプ",
+    "content": "コンテンツ",
+    "risk": "リスク",
+    "patterns": "パターン",
+    "reasons": "理由",
+    "noResults": "表示する結果がありません"
+  },
+  "errors": {
+    "fileNotFound": "ファイルが見つかりません: %s",
+    "invalidFormat": "無効なCSV形式です",
+    "readError": "ファイルの読み取りエラー: %s"
+  }
+}

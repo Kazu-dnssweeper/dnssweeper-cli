@@ -53,6 +53,28 @@ export interface Messages {
     lastModified: string;
     cnameWarning: string;
     noSpecialIssues: string;
+    obsoleteSuffix?: string;
+    deprecatedKeyword?: string;
+    longUnused?: string;
+    recentCreation?: string;
+    activelyUsed?: string;
+  };
+
+  // ファイル操作
+  fileOperations?: {
+    resultsSaved: string;
+    savingResults: string;
+    saveError: string;
+  };
+
+  // テーブルヘッダー
+  tableHeaders?: {
+    name: string;
+    type: string;
+    riskScore: string;
+    riskLevel: string;
+    matchedPatterns: string;
+    reasons: string;
   };
 }
 

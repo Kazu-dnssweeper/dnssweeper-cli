@@ -184,24 +184,27 @@ export function analyzeRiskByTime(results: AnalysisResult[]): {
 
   // 年別リスク分布
   for (const result of results) {
-    const year = new Date(result.record.modified).getFullYear().toString();
-    if (!yearlyRiskDistribution[year]) {
-      yearlyRiskDistribution[year] = {
-        critical: 0,
-        high: 0,
-        medium: 0,
-        low: 0,
-        safe: 0,
-      };
+    if (result.record.modified) {
+      const year = new Date(result.record.modified).getFullYear().toString();
+      if (!yearlyRiskDistribution[year]) {
+        yearlyRiskDistribution[year] = {
+          critical: 0,
+          high: 0,
+          medium: 0,
+          low: 0,
+          safe: 0,
+        };
+      }
+      yearlyRiskDistribution[year][result.riskLevel]++;
     }
-    yearlyRiskDistribution[year][result.riskLevel]++;
   }
 
   // 最も古いレコードと新しいレコード
-  const sortedByModified = [...results].sort(
+  const recordsWithModified = results.filter(r => r.record.modified);
+  const sortedByModified = [...recordsWithModified].sort(
     (a, b) =>
-      new Date(a.record.modified).getTime() -
-      new Date(b.record.modified).getTime(),
+      new Date(a.record.modified!).getTime() -
+      new Date(b.record.modified!).getTime(),
   );
 
   const oldestRecords = sortedByModified.slice(0, 5);

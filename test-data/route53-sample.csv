@@ -1,0 +1,6 @@
+Name,Type,Value,TTL,RoutingPolicy
+example.com.,A,192.168.1.1,300,Simple
+www.example.com.,CNAME,example.com,300,Simple
+mail.example.com.,MX,10 mail.example.com,3600,Simple
+test.example.com.,A,"192.168.1.2,192.168.1.3",300,Simple
+txt.example.com.,TXT,"v=spf1 include:_spf.example.com ~all",300,Simple

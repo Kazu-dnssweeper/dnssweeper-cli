@@ -81,25 +81,27 @@ export function analyzeRecord(
   }
 
   // 最終更新日時による追加スコア計算
-  const lastModified = new Date(record.modified);
-  const now = new Date();
-  const daysSinceModified =
-    (now.getTime() - lastModified.getTime()) / (1000 * 60 * 60 * 24);
+  if (record.modified) {
+    const lastModified = new Date(record.modified);
+    const now = new Date();
+    const daysSinceModified =
+      (now.getTime() - lastModified.getTime()) / (1000 * 60 * 60 * 24);
 
-  if (daysSinceModified > 365) {
-    riskScore += 20;
-    reasons.push(
-      formatMessage(messages.reasons.lastModified, {
-        days: Math.floor(daysSinceModified),
-      }),
-    );
-  } else if (daysSinceModified > 180) {
-    riskScore += 10;
-    reasons.push(
-      formatMessage(messages.reasons.lastModified, {
-        days: Math.floor(daysSinceModified),
-      }),
-    );
+    if (daysSinceModified > 365) {
+      riskScore += 20;
+      reasons.push(
+        formatMessage(messages.reasons.lastModified, {
+          days: Math.floor(daysSinceModified),
+        }),
+      );
+    } else if (daysSinceModified > 180) {
+      riskScore += 10;
+      reasons.push(
+        formatMessage(messages.reasons.lastModified, {
+          days: Math.floor(daysSinceModified),
+        }),
+      );
+    }
   }
 
   // レコードタイプによる調整
@@ -195,4 +197,19 @@ export function sortByRiskScore(
   return [...results].sort((a, b) => {
     return descending ? b.riskScore - a.riskScore : a.riskScore - b.riskScore;
   });
+}
+
+/**
+ * 単一のDNSレコードを分析（ストリーミング用エクスポート）
+ * @param record - DNSレコード
+ * @param config - パターン設定
+ * @param language - 言語設定
+ * @returns 分析結果
+ */
+export function analyzeSingleRecord(
+  record: DNSRecord,
+  config: PatternConfig,
+  language: Language = 'ja',
+): AnalysisResult {
+  return analyzeRecord(record, config, language);
 }

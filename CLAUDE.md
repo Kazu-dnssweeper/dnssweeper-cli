@@ -8,7 +8,7 @@
 
 ---
 
-# ⚠️ CLAUDE.md - DNSSweeper開発必須ルール
+# ⚠️ CLAUDE.md - DNSweeper開発必須ルール
 
 このファイルはClaude Code起動時に自動的に読み込まれます。
 忘れやすいので、この内容を各作業で参照してください。

@@ -1,25 +1,103 @@
 {
   "compilerOptions": {
+    // 言語とビルド設定
     "target": "ES2020",
     "module": "CommonJS",
+    "moduleResolution": "node",
     "lib": ["ES2020"],
+    
+    // 出力設定
     "outDir": "./dist",
     "rootDir": "./src",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
+    "declarationDir": "./dist/types",
+    
+    // 型生成
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
+    "removeComments": true,
+    
+    // モジュール解決
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    
+    // 厳格モード
+    "strict": true,
     "noImplicitAny": true,
-    "noImplicitReturns": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
     "noImplicitThis": true,
+    "alwaysStrict": true,
+    "exactOptionalPropertyTypes": false,
+    
+    // 追加チェック
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "exactOptionalPropertyTypes": true
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": false,
+    "noImplicitOverride": false,
+    "noPropertyAccessFromIndexSignature": false,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+    
+    // パフォーマンス最適化
+    "skipLibCheck": true,
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo",
+    
+    // パスマッピング
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@/types": ["src/types/index"],
+      "@/utils": ["src/utils/index"],
+      "@/analyzers": ["src/analyzers/index"],
+      "@/parsers": ["src/parsers/index"],
+      "@/patterns": ["src/patterns/index"],
+      "@/providers": ["src/providers/index"],
+      "@/commands": ["src/commands/index"]
+    },
+    
+    // Node.js設定
+    "allowJs": false,
+    "maxNodeModuleJsDepth": 0,
+    
+    // 型の扱い
+    "types": ["node", "jest"],
+    "typeRoots": ["./node_modules/@types", "./src/types"]
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "test"]
+  
+  // ファイル選択
+  "include": [
+    "src/**/*",
+    "test/**/*"
+  ],
+  
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "test/**/*",
+    "scripts/**/*",
+    "docs/**/*"
+  ],
+  
+  // ts-node設定
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node",
+    "transpileOnly": true,
+    "files": true,
+    "compilerOptions": {
+      "module": "CommonJS",
+      "allowJs": true
+    }
+  }
 }

@@ -1,0 +1,68 @@
+# ソースファイル（ビルド済みのみ公開）
+src/
+test/
+scripts/
+docs/
+
+# 設定ファイル
+.editorconfig
+.eslintrc*
+.prettierrc*
+.gitignore
+.nvmrc
+.snyk
+*.config.js
+*.config.ts
+tsconfig*.json
+Taskfile.yml
+jest.config.js
+vitest.config.ts
+.babelrc*
+.browserslistrc
+
+# 開発用ファイル
+*.test.ts
+*.spec.ts
+__tests__/
+__mocks__/
+coverage/
+.nyc_output/
+test-data/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+.husky/
+.git*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ドキュメント
+*.md
+!README.md
+!LICENSE
+
+# Claude Code
+.claude/
+
+# PDCA
+.pdca/
+pdca-config.yml
+
+# その他
+.DS_Store
+*.log
+*.tgz
+.env*
+.cache/
+tmp/
+.last-issue-check
+pnpm-lock.yaml
+yarn.lock
+package-lock.json

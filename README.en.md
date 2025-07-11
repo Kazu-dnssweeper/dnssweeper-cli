@@ -1,16 +1,16 @@
 # 🔍 DNSweeper CLI
 
-[![Test](https://github.com/Kazu-dnssweeper/dnssweeper-cli/workflows/Test/badge.svg)](https://github.com/Kazu-dnssweeper/dnssweeper-cli/actions?query=workflow%3ATest)
-[![CI](https://github.com/Kazu-dnssweeper/dnssweeper-cli/workflows/CI/badge.svg)](https://github.com/Kazu-dnssweeper/dnssweeper-cli/actions?query=workflow%3ACI)
-[![npm version](https://img.shields.io/npm/v/dnssweeper-cli.svg)](https://www.npmjs.com/package/dnssweeper-cli)
-[![npm downloads](https://img.shields.io/npm/dm/dnssweeper-cli.svg)](https://www.npmjs.com/package/dnssweeper-cli)
+[![Test](https://github.com/Kazu-dnsweeper/dnsweeper-cli/workflows/Test/badge.svg)](https://github.com/Kazu-dnsweeper/dnsweeper-cli/actions?query=workflow%3ATest)
+[![CI](https://github.com/Kazu-dnsweeper/dnsweeper-cli/workflows/CI/badge.svg)](https://github.com/Kazu-dnsweeper/dnsweeper-cli/actions?query=workflow%3ACI)
+[![npm version](https://img.shields.io/npm/v/dnsweeper-cli.svg)](https://www.npmjs.com/package/dnsweeper-cli)
+[![npm downloads](https://img.shields.io/npm/dm/dnsweeper-cli.svg)](https://www.npmjs.com/package/dnsweeper-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js Version](https://img.shields.io/node/v/dnssweeper-cli.svg)](https://nodejs.org/)
+[![Node.js Version](https://img.shields.io/node/v/dnsweeper-cli.svg)](https://nodejs.org/)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-blue.svg)](SECURITY.md)
 
 A command-line tool for detecting and analyzing unused DNS records
 
-🎉 **v0.1.0 is now available on npm!** Install: `npm install -g dnssweeper-cli`
+🎉 **v0.1.0 is now available on npm!** Install: `npm install -g dnsweeper-cli`
 
 [日本語版 README](README.md)
 
@@ -33,16 +33,16 @@ DNSweeper CLI is a tool that analyzes CSV files exported from DNS services like 
 
 ```bash
 # Using npm
-npm install -g dnssweeper-cli
+npm install -g dnsweeper-cli
 
 # Using pnpm (recommended)
-pnpm add -g dnssweeper-cli
+pnpm add -g dnsweeper-cli
 ```
 
 ### Direct Execution (npx)
 
 ```bash
-npx dnssweeper-cli analyze your-dns-records.csv
+npx dnsweeper-cli analyze your-dns-records.csv
 ```
 
 ## 📊 Risk Levels
@@ -63,43 +63,43 @@ DNSweeper CLI evaluates risk in 5 levels:
 
 ```bash
 # Analyze CSV file
-dnssweeper analyze dns-records.csv
+dnsweeper analyze dns-records.csv
 
 # Verbose output
-dnssweeper analyze dns-records.csv --verbose
+dnsweeper analyze dns-records.csv --verbose
 
 # Run in English mode
-dnssweeper analyze dns-records.csv --english
+dnsweeper analyze dns-records.csv --english
 ```
 
 ### Output Format Specification
 
 ```bash
 # Table format (default)
-dnssweeper analyze dns-records.csv --output table
+dnsweeper analyze dns-records.csv --output table
 
 # JSON format
-dnssweeper analyze dns-records.csv --output json
+dnsweeper analyze dns-records.csv --output json
 
 # CSV format
-dnssweeper analyze dns-records.csv --output csv
+dnsweeper analyze dns-records.csv --output csv
 ```
 
 ### Risk Level Filtering
 
 ```bash
 # Show only high risk and above
-dnssweeper analyze dns-records.csv --risk-level high
+dnsweeper analyze dns-records.csv --risk-level high
 
 # Show only critical records
-dnssweeper analyze dns-records.csv --risk-level critical
+dnsweeper analyze dns-records.csv --risk-level critical
 ```
 
 ### Save Results to File
 
 ```bash
 # Save analysis results to a CSV file
-dnssweeper analyze dns-records.csv --output-file results.csv
+dnsweeper analyze dns-records.csv --output-file results.csv
 ```
 
 ## 🛠️ Options
@@ -168,8 +168,8 @@ www.example.com,CNAME,example.com,300,true,2024-01-01,2024-01-01
 
 ```bash
 # Clone repository
-git clone https://github.com/Kazu-dnssweeper/dnssweeper-cli.git
-cd dnssweeper-cli
+git clone https://github.com/Kazu-dnsweeper/dnsweeper-cli.git
+cd dnsweeper-cli
 
 # Install dependencies
 pnpm install  # or npm install
@@ -222,7 +222,7 @@ This tool is **read-only**. It does not delete or modify any DNS records.
 
 ## 🆘 Support
 
-If you find any issues or bugs, please report them on [GitHub Issues](https://github.com/Kazu-dnssweeper/dnssweeper-cli/issues).
+If you find any issues or bugs, please report them on [GitHub Issues](https://github.com/Kazu-dnsweeper/dnsweeper-cli/issues).
 
 ## 📝 Changelog
 

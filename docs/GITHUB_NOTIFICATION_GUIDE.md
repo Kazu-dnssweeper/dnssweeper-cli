@@ -86,7 +86,7 @@ npm run issue:label -- 123
 ### Linux/Mac (cron)
 ```bash
 # crontab -e で編集
-*/5 * * * * cd /path/to/dnssweeper-cli && npm run watch:issues >> /tmp/dnssweeper-issues.log 2>&1
+*/5 * * * * cd /path/to/dnsweeper-cli && npm run watch:issues >> /tmp/dnssweeper-issues.log 2>&1
 ```
 
 ### Windows (タスクスケジューラ)
@@ -96,7 +96,7 @@ npm run issue:label -- 123
 4. 操作: プログラムの開始
    - プログラム: `npm`
    - 引数: `run watch:issues`
-   - 開始: `C:\path\to\dnssweeper-cli`
+   - 開始: `C:\path\to\dnsweeper-cli`
 
 ## 🔒 セキュリティ注意事項
 

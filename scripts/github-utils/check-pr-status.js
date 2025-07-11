@@ -70,7 +70,7 @@ try {
         console.log(`   🏷️  ラベル: ${labels}`);
       }
 
-      console.log(`   🔗 URL: https://github.com/Kazu-dnssweeper/dnssweeper-cli/pull/${pr.number}`);
+      console.log(`   🔗 URL: https://github.com/Kazu-dnssweeper/dnsweeper-cli/pull/${pr.number}`);
       
       // ステータスチェックの詳細
       if (pr.statusCheckRollup && pr.statusCheckRollup.length > 0) {

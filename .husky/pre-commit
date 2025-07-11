@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# 品質チェックバナー表示
+echo ""
+echo "🔍 DNSweeper Pre-commit Check"
+echo "============================="
+
+# lint-staged実行
+npx lint-staged
+
+# 結果確認
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "❌ Pre-commit チェックに失敗しました"
+  echo "📝 修正してから再度コミットしてください"
+  exit 1
+fi
+
+echo "✅ Pre-commit チェック完了"
+echo ""

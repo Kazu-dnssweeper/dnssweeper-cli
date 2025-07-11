@@ -49,7 +49,7 @@ try {
         console.log(`   ${colors.red}⚠️  担当者未設定${colors.reset}`);
       }
 
-      console.log(`   🔗 URL: https://github.com/Kazu-dnssweeper/dnssweeper-cli/issues/${issue.number}`);
+      console.log(`   🔗 URL: https://github.com/Kazu-dnssweeper/dnsweeper-cli/issues/${issue.number}`);
       
       if (index < issues.length - 1) {
         console.log('   ----------------------------------------');

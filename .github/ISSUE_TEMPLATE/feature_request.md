@@ -19,7 +19,7 @@ assignees: ''
 ### 想定される使用例 / Example Usage
 ```bash
 # コマンド例
-dnssweeper analyze records.csv --new-feature
+dnsweeper analyze records.csv --new-feature
 
 # 期待される出力
 ...

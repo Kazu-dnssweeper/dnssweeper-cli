@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "removeComments": true,
+    "sourceMap": false,
+    "inlineSources": false,
+    "declaration": true,
+    "declarationMap": false
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "test/**/*",
+    "scripts/**/*",
+    "docs/**/*",
+    "**/__tests__/**/*",
+    "**/__mocks__/**/*"
+  ]
+}

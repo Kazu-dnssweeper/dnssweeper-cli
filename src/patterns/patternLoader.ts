@@ -5,6 +5,11 @@
 import { promises as fs } from 'fs';
 import { join } from 'path';
 import { PatternConfig } from '../types/dns';
+import { 
+  PatternsConfigSchema,
+  checkDuplicatePatterns,
+  type PatternsConfig 
+} from '../schemas/pattern.schema';
 
 /**
  * patterns.jsonファイルを読み込む
@@ -26,12 +31,28 @@ export async function loadPatternConfig(
     const configContent = await fs.readFile(filePath, 'utf-8');
 
     // JSON解析
-    const config = JSON.parse(configContent) as PatternConfig;
+    const rawConfig = JSON.parse(configContent);
 
-    // 基本的なバリデーション
-    validatePatternConfig(config);
-
-    return config;
+    // Zodスキーマでバリデーション（新形式）
+    try {
+      const validatedConfig = PatternsConfigSchema.parse(rawConfig);
+      
+      // 重複チェック
+      const duplicateCheck = checkDuplicatePatterns(validatedConfig);
+      if (duplicateCheck.warnings) {
+        duplicateCheck.warnings.forEach(warning => {
+          console.warn(`パターン警告: ${warning.message}`);
+        });
+      }
+      
+      // 新形式から旧形式に変換
+      return convertToLegacyFormat(validatedConfig);
+    } catch (zodError) {
+      // 旧形式の場合は従来のバリデーションを使用
+      const config = rawConfig as PatternConfig;
+      validatePatternConfig(config);
+      return config;
+    }
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(`パターン設定読み込みエラー: ${error.message}`);
@@ -119,6 +140,60 @@ export function getDefaultPatternConfig(): PatternConfig {
         medium: ['archive', 'historical', 'previous'],
         low: ['future', 'upcoming', 'planned'],
       },
+    },
+    scoring: {
+      high: 80,
+      medium: 50,
+      low: 30,
+      base: 10,
+    },
+    thresholds: {
+      critical: 90,
+      high: 70,
+      medium: 50,
+      low: 30,
+      safe: 0,
+    },
+  };
+}
+
+/**
+ * 新形式（Zodスキーマ）から旧形式に変換
+ * @param config - 新形式のパターン設定
+ * @returns 旧形式のパターン設定
+ */
+function convertToLegacyFormat(config: PatternsConfig): PatternConfig {
+  // パターンを重要度別にグループ化
+  const prefixes: { high: string[]; medium: string[]; low: string[] } = { high: [], medium: [], low: [] };
+  const suffixes: { high: string[]; medium: string[]; low: string[] } = { high: [], medium: [], low: [] };
+  const keywords: { high: string[]; medium: string[]; low: string[] } = { high: [], medium: [], low: [] };
+  
+  // 各パターンタイプを処理
+  config.patterns.prefixes.forEach(rule => {
+    if (rule.category !== 'critical' && prefixes[rule.category]) {
+      prefixes[rule.category].push(rule.pattern);
+    }
+  });
+  
+  config.patterns.suffixes.forEach(rule => {
+    if (rule.category !== 'critical' && suffixes[rule.category]) {
+      suffixes[rule.category].push(rule.pattern);
+    }
+  });
+  
+  config.patterns.contains.forEach(rule => {
+    if (rule.category !== 'critical' && keywords[rule.category]) {
+      keywords[rule.category].push(rule.pattern);
+    }
+  });
+  
+  return {
+    version: config.version,
+    description: config.metadata?.description || 'DNSレコード判定パターン',
+    patterns: {
+      prefixes,
+      suffixes,
+      keywords,
     },
     scoring: {
       high: 80,

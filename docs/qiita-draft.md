@@ -27,13 +27,13 @@ CloudflareなどのDNSサービスからエクスポートしたCSVファイル�
 ## 🚀 インストール
 
 ```bash
-npm install -g dnssweeper-cli
+npm install -g dnsweeper-cli
 ```
 
 または、インストールせずに実行：
 
 ```bash
-npx dnssweeper-cli analyze your-dns-records.csv
+npx dnsweeper-cli analyze your-dns-records.csv
 ```
 
 ## 📋 使い方
@@ -41,7 +41,7 @@ npx dnssweeper-cli analyze your-dns-records.csv
 ### 基本的な使い方
 
 ```bash
-dnssweeper analyze cloudflare-export.csv
+dnsweeper analyze cloudflare-export.csv
 ```
 
 実行すると、こんな感じで結果が表示されます：
@@ -80,19 +80,19 @@ No   リスク         スコア  レコード名                    タイプ
 #### 1. 高リスクレコードのみ表示
 
 ```bash
-dnssweeper analyze records.csv --risk-level high
+dnsweeper analyze records.csv --risk-level high
 ```
 
 #### 2. CSV形式で出力（運用フロー用）
 
 ```bash
-dnssweeper analyze records.csv --output csv --output-file high-risk.csv
+dnsweeper analyze records.csv --output csv --output-file high-risk.csv
 ```
 
 #### 3. 英語で出力
 
 ```bash
-dnssweeper analyze records.csv --english
+dnsweeper analyze records.csv --english
 ```
 
 ## 🎯 検出パターン
@@ -132,7 +132,7 @@ DNSweeperは以下のようなパターンを検出します：
 
 2. **分析実行**（30秒）
    ```bash
-   dnssweeper analyze dns-export.csv --risk-level high --output-file review.csv
+   dnsweeper analyze dns-export.csv --risk-level high --output-file review.csv
    ```
 
 3. **レビュー**（30分）
@@ -161,8 +161,8 @@ DNSweeperは以下のようなパターンを検出します：
 
 バグ報告や機能提案は大歓迎です！
 
-- GitHub: https://github.com/Kazu-dnssweeper/dnssweeper-cli
-- npm: https://www.npmjs.com/package/dnssweeper-cli
+- GitHub: https://github.com/Kazu-dnssweeper/dnsweeper-cli
+- npm: https://www.npmjs.com/package/dnsweeper-cli
 
 ### 貢献方法
 1. Issue を作成
@@ -183,7 +183,7 @@ DNSweeper CLIを使えば、肥大化したDNSレコードを効率的に整理�
 
 ```bash
 # 今すぐ試す
-npx dnssweeper-cli analyze your-dns-records.csv
+npx dnsweeper-cli analyze your-dns-records.csv
 ```
 
 フィードバックお待ちしています！🚀
@@ -191,6 +191,6 @@ npx dnssweeper-cli analyze your-dns-records.csv
 ---
 
 ### 関連リンク
-- [GitHub リポジトリ](https://github.com/Kazu-dnssweeper/dnssweeper-cli)
-- [npm パッケージ](https://www.npmjs.com/package/dnssweeper-cli)
-- [Issue・要望](https://github.com/Kazu-dnssweeper/dnssweeper-cli/issues)
+- [GitHub リポジトリ](https://github.com/Kazu-dnssweeper/dnsweeper-cli)
+- [npm パッケージ](https://www.npmjs.com/package/dnsweeper-cli)
+- [Issue・要望](https://github.com/Kazu-dnssweeper/dnsweeper-cli/issues)

@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "sourceMap": true,
+    "inlineSources": true,
+    "removeComments": false,
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo.dev"
+  },
+  "include": [
+    "src/**/*",
+    "test/**/*",
+    "scripts/**/*"
+  ],
+  "ts-node": {
+    "transpileOnly": true,
+    "files": true
+  }
+}

@@ -1,0 +1,355 @@
+# DNSweeper Task Runner Configuration
+# タスクランナー設定ファイル - Goベースの高速タスク実行
+
+version: '3'
+
+vars:
+  # プロジェクト変数
+  PROJECT_NAME: dnsweeper-cli
+  BUILD_DIR: dist
+  COVERAGE_DIR: coverage
+  TEST_RESULTS_DIR: test-results
+  DOCS_DIR: docs
+  
+  # 色設定
+  COLOR_SUCCESS: "\033[0;32m"
+  COLOR_WARNING: "\033[0;33m"
+  COLOR_ERROR: "\033[0;31m"
+  COLOR_INFO: "\033[0;36m"
+  COLOR_RESET: "\033[0m"
+
+# タスクグループ
+includes:
+  dev: ./tasks/dev.yml
+  build: ./tasks/build.yml
+  test: ./tasks/test.yml
+  quality: ./tasks/quality.yml
+  release: ./tasks/release.yml
+
+# エラー処理設定
+set:
+  - e # エラー時に停止
+  - u # 未定義変数でエラー
+  - pipefail # パイプラインエラーを検知
+
+# デフォルトタスク
+tasks:
+  default:
+    desc: "タスク一覧を表示"
+    cmds:
+      - task --list-all
+
+  # 開発タスク
+  dev:
+    desc: "開発サーバーを起動"
+    deps: [setup:check]
+    cmds:
+      - echo "{{.COLOR_INFO}}🚀 開発モード起動{{.COLOR_RESET}}"
+      - pnpm run dev
+
+  dev:watch:
+    desc: "ファイル変更を監視して自動再起動"
+    deps: [setup:check]
+    cmds:
+      - echo "{{.COLOR_INFO}}👀 ウォッチモード起動{{.COLOR_RESET}}"
+      - nodemon --watch src --ext ts --exec "pnpm run dev"
+
+  # ビルドタスク
+  build:
+    desc: "プロダクションビルド"
+    deps: [clean:dist]
+    cmds:
+      - echo "{{.COLOR_INFO}}🔨 ビルド開始{{.COLOR_RESET}}"
+      - pnpm run build
+      - echo "{{.COLOR_SUCCESS}}✅ ビルド完了{{.COLOR_RESET}}"
+    sources:
+      - src/**/*.ts
+      - tsconfig.json
+    generates:
+      - dist/**/*.js
+
+  build:fast:
+    desc: "tsupによる高速ビルド"
+    deps: [clean:dist]
+    cmds:
+      - echo "{{.COLOR_INFO}}⚡ 高速ビルド開始 (tsup){{.COLOR_RESET}}"
+      - pnpm tsup
+      - echo "{{.COLOR_SUCCESS}}✅ 高速ビルド完了{{.COLOR_RESET}}"
+
+  build:esbuild:
+    desc: "esbuildによる超高速ビルド"
+    deps: [clean:dist]
+    cmds:
+      - echo "{{.COLOR_INFO}}⚡⚡ 超高速ビルド開始 (esbuild){{.COLOR_RESET}}"
+      - pnpm esbuild
+      - echo "{{.COLOR_SUCCESS}}✅ 超高速ビルド完了{{.COLOR_RESET}}"
+
+  build:analyze:
+    desc: "バンドルサイズ分析"
+    cmds:
+      - echo "{{.COLOR_INFO}}📊 バンドル分析開始{{.COLOR_RESET}}"
+      - pnpm tsup --metafile
+      - pnpm esbuild-visualizer --metadata ./dist/metafile.json --open
+
+  # テストタスク
+  test:
+    desc: "すべてのテストを実行"
+    deps: [test:unit, test:e2e]
+    cmds:
+      - echo "{{.COLOR_SUCCESS}}✅ すべてのテスト完了{{.COLOR_RESET}}"
+
+  test:unit:
+    desc: "単体テストを実行"
+    cmds:
+      - echo "{{.COLOR_INFO}}🧪 単体テスト実行{{.COLOR_RESET}}"
+      - pnpm test:unit
+
+  test:watch:
+    desc: "テストをウォッチモードで実行"
+    cmds:
+      - echo "{{.COLOR_INFO}}👀 テストウォッチモード{{.COLOR_RESET}}"
+      - pnpm test:watch
+
+  test:coverage:
+    desc: "カバレッジ付きでテスト実行"
+    cmds:
+      - echo "{{.COLOR_INFO}}📊 カバレッジ測定{{.COLOR_RESET}}"
+      - pnpm test:coverage
+      - echo "{{.COLOR_INFO}}📈 カバレッジレポート: {{.COVERAGE_DIR}}/index.html{{.COLOR_RESET}}"
+
+  test:e2e:
+    desc: "E2Eテストを実行"
+    deps: [build]
+    cmds:
+      - echo "{{.COLOR_INFO}}🎭 E2Eテスト実行{{.COLOR_RESET}}"
+      - pnpm test:e2e
+
+  # 品質チェックタスク
+  quality:
+    desc: "すべての品質チェックを実行"
+    cmds:
+      - task: quality:parallel
+      - echo "{{.COLOR_SUCCESS}}✅ 品質チェック完了{{.COLOR_RESET}}"
+
+  quality:parallel:
+    desc: "品質チェックを並列実行"
+    deps:
+      - lint
+      - format:check
+      - type-check
+
+  lint:
+    desc: "ESLintでコード検証"
+    cmds:
+      - echo "{{.COLOR_INFO}}🔍 Lint実行{{.COLOR_RESET}}"
+      - pnpm lint
+    sources:
+      - src/**/*.ts
+      - .eslintrc.json
+
+  lint:fix:
+    desc: "ESLintで自動修正"
+    cmds:
+      - echo "{{.COLOR_INFO}}🔧 Lint自動修正{{.COLOR_RESET}}"
+      - pnpm lint:fix
+
+  format:
+    desc: "Prettierでフォーマット"
+    cmds:
+      - echo "{{.COLOR_INFO}}💅 フォーマット実行{{.COLOR_RESET}}"
+      - pnpm format
+
+  format:check:
+    desc: "フォーマットチェック"
+    cmds:
+      - echo "{{.COLOR_INFO}}📏 フォーマットチェック{{.COLOR_RESET}}"
+      - prettier --check "src/**/*.ts"
+
+  type-check:
+    desc: "TypeScript型チェック"
+    cmds:
+      - echo "{{.COLOR_INFO}}🔎 型チェック実行{{.COLOR_RESET}}"
+      - pnpm type-check
+    sources:
+      - src/**/*.ts
+      - tsconfig.json
+
+  # クリーンタスク
+  clean:
+    desc: "すべてのビルド成果物を削除"
+    cmds:
+      - task: clean:parallel
+
+  clean:parallel:
+    desc: "クリーンタスクを並列実行"
+    deps:
+      - clean:dist
+      - clean:coverage
+      - clean:test-results
+
+  clean:dist:
+    desc: "ビルド成果物を削除"
+    cmds:
+      - rm -rf {{.BUILD_DIR}}
+
+  clean:coverage:
+    desc: "カバレッジファイルを削除"
+    cmds:
+      - rm -rf {{.COVERAGE_DIR}}
+
+  clean:test-results:
+    desc: "テスト結果を削除"
+    cmds:
+      - rm -rf {{.TEST_RESULTS_DIR}}
+
+  clean:all:
+    desc: "すべてのファイルを削除（node_modules含む）"
+    cmds:
+      - task: clean
+      - rm -rf node_modules
+      - rm -rf .pnpm-store
+      - rm -f pnpm-lock.yaml
+
+  # セットアップタスク
+  setup:
+    desc: "開発環境をセットアップ"
+    cmds:
+      - echo "{{.COLOR_INFO}}🛠️  開発環境セットアップ{{.COLOR_RESET}}"
+      - pnpm install
+      - pnpm run setup:permissions
+      - echo "{{.COLOR_SUCCESS}}✅ セットアップ完了{{.COLOR_RESET}}"
+
+  setup:check:
+    desc: "開発環境をチェック"
+    cmds:
+      - |
+        if [ ! -d "node_modules" ]; then
+          echo "{{.COLOR_WARNING}}⚠️  node_modulesが見つかりません{{.COLOR_RESET}}"
+          task setup
+        fi
+    silent: true
+
+  # リリースタスク
+  release:
+    desc: "リリース処理を実行"
+    deps: [quality, test]
+    cmds:
+      - echo "{{.COLOR_INFO}}📦 リリース準備{{.COLOR_RESET}}"
+      - pnpm run release
+
+  publish:
+    desc: "npmに公開"
+    deps: [release]
+    cmds:
+      - echo "{{.COLOR_INFO}}🚀 npm公開{{.COLOR_RESET}}"
+      - pnpm publish
+
+  # ドキュメントタスク
+  docs:generate:
+    desc: "ドキュメントを生成"
+    cmds:
+      - echo "{{.COLOR_INFO}}📚 ドキュメント生成{{.COLOR_RESET}}"
+      - typedoc --out {{.DOCS_DIR}} src
+
+  docs:serve:
+    desc: "ドキュメントサーバーを起動"
+    deps: [docs:generate]
+    cmds:
+      - echo "{{.COLOR_INFO}}🌐 ドキュメントサーバー起動{{.COLOR_RESET}}"
+      - npx serve {{.DOCS_DIR}}
+
+  # CI/CD タスク
+  ci:
+    desc: "CI環境で実行するタスク"
+    cmds:
+      - task: setup
+      - task: quality
+      - task: test
+      - task: build
+
+  ci:fast:
+    desc: "高速CIタスク（並列実行）"
+    deps:
+      - setup
+    cmds:
+      - task: ci:parallel
+
+  ci:parallel:
+    desc: "CIタスクを並列実行"
+    deps:
+      - quality:parallel
+      - test:unit
+      - build:fast
+
+  # ユーティリティタスク
+  check:deps:
+    desc: "依存関係をチェック"
+    cmds:
+      - echo "{{.COLOR_INFO}}🔍 依存関係チェック{{.COLOR_RESET}}"
+      - pnpm audit
+
+  update:deps:
+    desc: "依存関係を更新"
+    cmds:
+      - echo "{{.COLOR_INFO}}📦 依存関係更新{{.COLOR_RESET}}"
+      - pnpm update --interactive
+
+  info:
+    desc: "プロジェクト情報を表示"
+    cmds:
+      - echo "{{.COLOR_INFO}}ℹ️  プロジェクト情報{{.COLOR_RESET}}"
+      - echo "プロジェクト: {{.PROJECT_NAME}}"
+      - echo "Node.js: $(node -v)"
+      - echo "pnpm: $(pnpm -v)"
+      - echo "TypeScript: $(pnpm tsc -v)"
+
+  # ベンチマークタスク
+  benchmark:
+    desc: "パフォーマンスベンチマーク実行"
+    deps: [build]
+    cmds:
+      - echo "{{.COLOR_INFO}}⏱️  ベンチマーク実行{{.COLOR_RESET}}"
+      - node scripts/benchmark-streaming.js
+
+  # GitHub連携タスク
+  issue:list:
+    desc: "GitHub Issueリストを表示"
+    cmds:
+      - echo "{{.COLOR_INFO}}📋 Issue一覧{{.COLOR_RESET}}"
+      - gh issue list --state open
+
+  pr:status:
+    desc: "PRステータスを確認"
+    cmds:
+      - echo "{{.COLOR_INFO}}🔀 PRステータス{{.COLOR_RESET}}"
+      - gh pr status
+
+  # カスタムワークフロー
+  workflow:morning:
+    desc: "朝の開発開始ワークフロー"
+    cmds:
+      - echo "{{.COLOR_INFO}}☀️  おはようございます！開発環境準備中...{{.COLOR_RESET}}"
+      - task: setup:check
+      - task: update:deps
+      - task: issue:list
+      - echo "{{.COLOR_SUCCESS}}✅ 準備完了！今日も良い開発を！{{.COLOR_RESET}}"
+
+  workflow:commit:
+    desc: "コミット前ワークフロー"
+    cmds:
+      - echo "{{.COLOR_INFO}}📝 コミット前チェック{{.COLOR_RESET}}"
+      - task: quality:parallel
+      - task: test:unit
+      - echo "{{.COLOR_SUCCESS}}✅ コミット準備完了{{.COLOR_RESET}}"
+
+  workflow:release:
+    desc: "リリース前の完全チェック"
+    cmds:
+      - echo "{{.COLOR_INFO}}🚀 リリース前チェック開始{{.COLOR_RESET}}"
+      - task: clean
+      - task: setup
+      - task: quality
+      - task: test
+      - task: build
+      - task: docs:generate
+      - echo "{{.COLOR_SUCCESS}}✅ リリース準備完了！{{.COLOR_RESET}}"

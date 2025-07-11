@@ -7,7 +7,7 @@ export interface DNSRecord {
   name: string;
   type: string;
   content: string;
-  ttl: number;
+  ttl?: number;
   
   // Cloudflare固有
   proxied?: boolean;

@@ -38,8 +38,8 @@ DNSweeper CLIへの貢献を検討いただき、ありがとうございます�
 
 ```bash
 # リポジトリをクローン
-git clone https://github.com/Kazu-dnssweeper/dnssweeper-cli.git
-cd dnssweeper-cli
+git clone https://github.com/Kazu-dnssweeper/dnsweeper-cli.git
+cd dnsweeper-cli
 
 # 依存関係をインストール
 npm install

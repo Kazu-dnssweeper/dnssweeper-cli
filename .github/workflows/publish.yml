@@ -70,7 +70,7 @@ jobs:
           
           ### インストール
           ```bash
-          npm install -g dnssweeper-cli@${{ github.event.inputs.version }}
+          npm install -g dnsweeper-cli@${{ github.event.inputs.version }}
           ```
           
           ### 変更内容
@@ -81,6 +81,6 @@ jobs:
     - name: Post-publish notification
       if: success()
       run: |
-        echo "✅ Successfully published dnssweeper-cli to npm!"
-        echo "📦 View package: https://www.npmjs.com/package/dnssweeper-cli"
+        echo "✅ Successfully published dnsweeper-cli to npm!"
+        echo "📦 View package: https://www.npmjs.com/package/dnsweeper-cli"
         echo "🏷️ Version: ${{ github.event.inputs.version || github.ref_name }}"

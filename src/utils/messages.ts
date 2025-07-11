@@ -4,6 +4,22 @@
 
 export type Language = 'ja' | 'en';
 
+let currentLanguage: Language = 'ja';
+
+/**
+ * 現在の言語設定を取得
+ */
+export function getLanguage(): Language {
+  return currentLanguage;
+}
+
+/**
+ * 言語を設定
+ */
+export function setLanguage(language: Language): void {
+  currentLanguage = language;
+}
+
 export interface Messages {
   // アプリケーション基本メッセージ
   app: {

@@ -7,6 +7,11 @@ import { promises as fs } from 'fs';
 import { DNSRecord } from '../types/dns';
 import { ProviderDetector } from '../providers/ProviderDetector';
 import { DNSProvider } from '../providers/types';
+import { 
+  parseCSVRow,
+  validateDNSRecord as validateWithZod 
+} from '../schemas/dns-record.schema';
+import { z } from 'zod';
 
 /**
  * CSVファイルからDNSレコードを読み込む
@@ -76,18 +81,37 @@ export async function parseDNSRecordsFromCSV(
     
     rows.forEach((row: Record<string, any>, index: number) => {
       try {
-        const record = provider.parse(row, headers);
-        if (record) {
-          // プロバイダー情報を追加
-          record.provider = provider.name;
-          records.push(record);
+        // Zodスキーマを使用してパース
+        const parsedRecord = parseCSVRow(row, provider?.name);
+        if (parsedRecord) {
+          records.push(parsedRecord);
         } else {
-          console.warn(`警告: 行${index + 2}をパースできませんでした`);
+          // 従来の方法でパース
+          const record = provider.parse(row, headers);
+          if (record) {
+            // Zodでバリデーション
+            const validation = validateWithZod(record);
+            if (validation.success) {
+              record.provider = provider.name;
+              records.push(record);
+            } else {
+              console.warn(`警告: 行${index + 2}のバリデーションエラー:`, validation.errors);
+            }
+          } else {
+            console.warn(`警告: 行${index + 2}をパースできませんでした`);
+          }
         }
       } catch (error) {
-        console.warn(
-          `警告: 行${index + 2}の変換エラー: ${error instanceof Error ? error.message : String(error)}`,
-        );
+        if (error instanceof z.ZodError) {
+          console.warn(
+            `警告: 行${index + 2}の型エラー:`,
+            error.issues.map(e => `${e.path.join('.')}: ${e.message}`).join(', ')
+          );
+        } else {
+          console.warn(
+            `警告: 行${index + 2}の変換エラー: ${error instanceof Error ? error.message : String(error)}`,
+          );
+        }
       }
     });
 
@@ -109,30 +133,29 @@ export function validateDNSRecord(record: DNSRecord): {
   isValid: boolean;
   errors: string[];
 } {
-  const errors: string[] = [];
-
-  if (!record.name) {
-    errors.push('Name フィールドが必須です');
+  // Zodスキーマを使用してバリデーション
+  const validation = validateWithZod(record);
+  
+  if (validation.success) {
+    return {
+      isValid: true,
+      errors: [],
+    };
   }
-
-  if (!record.type) {
-    errors.push('Type フィールドが必須です');
-  }
-
-  if (
-    !['A', 'AAAA', 'CNAME', 'MX', 'TXT', 'SRV', 'PTR', 'NS', 'SOA', 'CAA', 'SPF'].includes(
-      record.type,
-    )
-  ) {
-    errors.push(`サポートされていないDNSレコードタイプ: ${record.type}`);
-  }
-
-  if (record.ttl < 1 || record.ttl > 2147483647) {
-    errors.push(`TTL値が範囲外です: ${record.ttl} (1-2147483647)`);
-  }
-
+  
+  // Zodのエラーをユーザーフレンドリーな形式に変換
+  const errors = validation.errors?.map(error => {
+    if (error.field === 'type') {
+      return `サポートされていないDNSレコードタイプ: ${record.type}`;
+    }
+    if (error.field === 'ttl') {
+      return `TTL値が範囲外です: ${record.ttl} (1-86400)`;
+    }
+    return `${error.field}: ${error.message}`;
+  }) || [];
+  
   return {
-    isValid: errors.length === 0,
+    isValid: false,
     errors,
   };
 }

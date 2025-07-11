@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: 📖 ドキュメント / Documentation
-    url: https://github.com/Kazu-dnssweeper/dnssweeper-cli#readme
+    url: https://github.com/Kazu-dnssweeper/dnsweeper-cli#readme
     about: まずはREADMEをご確認ください / Please check the README first
   - name: 💬 ディスカッション / Discussions
-    url: https://github.com/Kazu-dnssweeper/dnssweeper-cli/discussions
+    url: https://github.com/Kazu-dnssweeper/dnsweeper-cli/discussions
     about: アイデアや一般的な質問はこちら / For ideas and general questions

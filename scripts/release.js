@@ -155,7 +155,7 @@ function generateReleaseNotes(version) {
     }
   }
   
-  notes += '### インストール\n\n```bash\nnpm install -g dnssweeper-cli@' + version + '\n```\n';
+  notes += '### インストール\n\n```bash\nnpm install -g dnsweeper-cli@' + version + '\n```\n';
   
   return notes;
 }
@@ -222,7 +222,7 @@ async function main() {
   // 確認
   console.log(colors.yellow('\n🚨 リリース前の最終確認'));
   console.log(`- バージョン: ${newVersion}`);
-  console.log(`- npm公開: dnssweeper-cli@${newVersion}`);
+  console.log(`- npm公開: dnsweeper-cli@${newVersion}`);
   console.log(`- GitHubタグ: v${newVersion}`);
   
   const answer = await prompt('\nリリースを実行しますか? (y/n): ');
@@ -247,7 +247,7 @@ async function main() {
   console.log(colors.green('\n✨ リリース準備完了！'));
   console.log('\n次のステップ:');
   console.log('1. GitHub Actions の Publish ワークフローを手動実行');
-  console.log(`   https://github.com/Kazu-dnssweeper/dnssweeper-cli/actions/workflows/publish.yml`);
+  console.log(`   https://github.com/Kazu-dnssweeper/dnsweeper-cli/actions/workflows/publish.yml`);
   console.log(`2. バージョン ${newVersion} を入力`);
   console.log('3. ワークフロー実行');
   console.log('\n または GitHub でリリースを作成すると自動的に npm に公開されます');

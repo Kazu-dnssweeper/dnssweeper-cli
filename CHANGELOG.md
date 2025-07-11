@@ -47,5 +47,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - APIキーや認証情報の送信なし
 - ローカルファイル解析のみ実行
 
-[Unreleased]: https://github.com/Kazu-dnssweeper/dnssweeper-cli/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/Kazu-dnssweeper/dnssweeper-cli/releases/tag/v0.1.0
+[Unreleased]: https://github.com/Kazu-dnssweeper/dnsweeper-cli/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/Kazu-dnssweeper/dnsweeper-cli/releases/tag/v0.1.0

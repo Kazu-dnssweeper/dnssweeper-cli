@@ -3,8 +3,8 @@
 ## 概要
 - **リリース日**: 2025年7月10日  
 - **バージョン**: v0.1.0
-- **npm パッケージ**: [dnssweeper-cli](https://www.npmjs.com/package/dnssweeper-cli)
-- **リポジトリ**: https://github.com/dnssweeper/dnssweeper-cli
+- **npm パッケージ**: [dnsweeper-cli](https://www.npmjs.com/package/dnsweeper-cli)
+- **リポジトリ**: https://github.com/dnssweeper/dnsweeper-cli
 
 ## リリース達成事項
 

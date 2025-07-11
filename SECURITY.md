@@ -45,11 +45,11 @@ DNSweeper CLIのセキュリティ脆弱性を発見した場合は、以下の�
 1. **APIキーの管理**
    ```bash
    # ❌ 悪い例
-   dnssweeper analyze --api-key=sk-1234567890
+   dnsweeper analyze --api-key=sk-1234567890
    
    # ✅ 良い例
    export CLOUDFLARE_API_KEY=sk-1234567890
-   dnssweeper analyze
+   dnsweeper analyze
    ```
 
 2. **CSVファイルの取り扱い**
@@ -60,7 +60,7 @@ DNSweeper CLIのセキュリティ脆弱性を発見した場合は、以下の�
 3. **出力ファイルの保護**
    ```bash
    # 出力ファイルの権限を制限
-   dnssweeper analyze data.csv -o results.csv
+   dnsweeper analyze data.csv -o results.csv
    chmod 600 results.csv
    ```
 

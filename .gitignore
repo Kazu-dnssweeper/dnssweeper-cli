@@ -1,9 +1,58 @@
 # 依存関係
 node_modules/
+.pnpm-store/
+.yarn/
 
-# ビルド出力
+# ビルド成果物
 dist/
 build/
+out/
+*.tsbuildinfo
+.turbo/
+
+# テスト関連
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+playwright/.cache/
+*.lcov
+
+# IDE設定
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.sublime-workspace
+
+# OS固有ファイル
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.directory
+*.bak
+
+# 環境変数・設定
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
+*.key
+*.cert
 
 # ログファイル
 logs/
@@ -11,69 +60,64 @@ logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# 環境変数
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# テストカバレッジ
-coverage/
-
-# IDE設定
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS固有
-.DS_Store
-Thumbs.db
+# セキュリティ関連
+security-report.json
+snyk-results.json
+.snyk
 
 # 一時ファイル
 *.tmp
 *.temp
+*.cache
+.eslintcache
+.stylelintcache
+.prettiercache
 
-# パッケージファイル
+# バンドル分析
+dist/metafile.json
+dist/bundle-analysis.html
+metrics-dashboard.html
+stats.json
+
+# デバッグファイル
+*.heap
+*.cpuprofile
+*.heapsnapshot
+
+# パッケージファイル（誤ってコミットされるのを防ぐ）
 *.tgz
 *.tar.gz
+*.zip
 
-# TypeScript
-*.tsbuildinfo
-
-# pnpm
-pnpm-lock.yaml
-.pnpm-store/
+# ドキュメント生成
+docs/api/
+_book/
+.docusaurus/
 
 # Claude Code設定（ローカル）
 .claude/settings.local.json
 .claude.json
 
-# セキュリティ
-*.pem
-*.key
-*.cert
+# PDCA関連（ローカルレポート）
+.pdca/
 
-# npm publish
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-
-# Runtime data
-pids
+# その他
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+.vuepress/dist/
+.serverless/
+.fusebox/
+.dynamodb/
+.tern-port
+.vscode-test/
 *.pid
 *.seed
 *.pid.lock
-
-# Optional npm cache directory
-.npm
-
-# Optional eslint cache
-.eslintcache
 
 # Issue監視
 .last-issue-check

@@ -26,6 +26,19 @@ arguments: []
 | `/dns-implement` | `/dim` | ⚙️ 実装フェーズ | `/dim パーサー最適化` |
 | `/dns-test` | `/dt` | 🧪 テストフェーズ | `/dt all` |
 
+## 🔄 PDCAサイクルコマンド（継続的改善）
+
+| 通常版 | 短縮版 | 説明 | 実行時間 |
+|--------|--------|------|----------|
+| `/dns-pdca-weekly` | `/dpw` | 📊 週次改善サイクル（金曜推奨） | 15分 |
+| `/dns-pdca-daily` | `/dpd` | ✅ 日次チェック（毎日実行） | 5分 |
+| `/dns-pdca-release` | `/dpr` | 🚀 リリース前後チェック | 10分 |
+| `/dns-pdca-alert` | `/dpa` | 🚨 緊急対応（インシデント時） | 30分 |
+| `/dns-pdca-metrics` | `/dpm` | 📈 詳細メトリクス分析 | 20分 |
+| `/dns-pdca-experiment` | `/dpe` | 🧪 実験的改善の検証 | 1-2週間 |
+| `/dns-pdca-auto-enable` | `/dpae` | 🤖 PDCA自動化設定 | 30分 |
+| `/dns-pdca-claude-settings` | `/dpcs` | ⚙️ Claude品質モード設定 | - |
+
 ## 💡 使い方のコツ
 
 ### 1日の基本フロー

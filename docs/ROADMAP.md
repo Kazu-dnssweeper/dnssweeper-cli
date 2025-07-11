@@ -154,7 +154,7 @@ DNSweeper CLI は、DNS レコード管理の業界標準ツールとなるこ�
 ## 💬 フィードバック募集
 
 ロードマップに関するご意見・ご要望は以下までお寄せください：
-- GitHub Issues: https://github.com/dnssweeper/dnssweeper-cli/issues
+- GitHub Issues: https://github.com/dnssweeper/dnsweeper-cli/issues
 - Email: feedback@dnssweeper.dev
 - Twitter: @dnssweeper
 

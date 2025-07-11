@@ -1,16 +1,16 @@
 # 🔍 DNSweeper CLI
 
-[![Test](https://github.com/Kazu-dnssweeper/dnssweeper-cli/workflows/Test/badge.svg)](https://github.com/Kazu-dnssweeper/dnssweeper-cli/actions?query=workflow%3ATest)
-[![CI](https://github.com/Kazu-dnssweeper/dnssweeper-cli/workflows/CI/badge.svg)](https://github.com/Kazu-dnssweeper/dnssweeper-cli/actions?query=workflow%3ACI)
-[![npm version](https://img.shields.io/npm/v/dnssweeper-cli.svg)](https://www.npmjs.com/package/dnssweeper-cli)
-[![npm downloads](https://img.shields.io/npm/dm/dnssweeper-cli.svg)](https://www.npmjs.com/package/dnssweeper-cli)
+[![Test](https://github.com/Kazu-dnsweeper/dnsweeper-cli/workflows/Test/badge.svg)](https://github.com/Kazu-dnsweeper/dnsweeper-cli/actions?query=workflow%3ATest)
+[![CI](https://github.com/Kazu-dnsweeper/dnsweeper-cli/workflows/CI/badge.svg)](https://github.com/Kazu-dnsweeper/dnsweeper-cli/actions?query=workflow%3ACI)
+[![npm version](https://img.shields.io/npm/v/dnsweeper-cli.svg)](https://www.npmjs.com/package/dnsweeper-cli)
+[![npm downloads](https://img.shields.io/npm/dm/dnsweeper-cli.svg)](https://www.npmjs.com/package/dnsweeper-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js Version](https://img.shields.io/node/v/dnssweeper-cli.svg)](https://nodejs.org/)
+[![Node.js Version](https://img.shields.io/node/v/dnsweeper-cli.svg)](https://nodejs.org/)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-blue.svg)](SECURITY.md)
 
 未使用のDNSレコードを検出・分析するコマンドラインツール
 
-🎉 **v0.1.0 がnpmで公開されました！** インストール: `npm install -g dnssweeper-cli`
+🎉 **v0.1.0 がnpmで公開されました！** インストール: `npm install -g dnsweeper-cli`
 
 [English README](README.en.md)
 
@@ -35,16 +35,57 @@ DNSweeper CLIは、各種DNSサービスからエクスポートしたCSVファ�
 
 ```bash
 # npmを使用する場合
-npm install -g dnssweeper-cli
+npm install -g dnsweeper-cli
 
 # pnpmを使用する場合（推奨）
-pnpm add -g dnssweeper-cli
+pnpm add -g dnsweeper-cli
 ```
 
 ### 直接実行（npx）
 
 ```bash
-npx dnssweeper-cli analyze your-dns-records.csv
+npx dnsweeper-cli analyze your-dns-records.csv
+```
+
+## 🛠️ 開発環境
+
+### ビルドツール
+
+DNSweeperは高速ビルドのため、以下のツールを採用しています：
+
+- **Task** - Go製の高速タスクランナー
+- **tsup** - TypeScript用の高速バンドラー
+- **esbuild** - 超高速JavaScriptバンドラー
+
+### 開発用コマンド
+
+```bash
+# Taskランナーのインストール（初回のみ）
+# macOS/Linux
+brew install go-task/tap/go-task
+# Windows (Scoop)
+scoop install task
+
+# 開発サーバー起動
+task dev
+
+# ビルド（3種類の方法）
+task build          # 通常のTypeScriptビルド
+task build:fast     # tsupによる高速ビルド
+task build:esbuild  # esbuildによる超高速ビルド
+
+# テスト実行
+task test           # すべてのテスト
+task test:watch     # ウォッチモード
+task test:coverage  # カバレッジ測定
+
+# 品質チェック
+task quality        # Lint、フォーマット、型チェック
+task lint:fix       # Lintエラーを自動修正
+
+# その他の便利なコマンド
+task --list-all     # 利用可能なタスク一覧
+task info          # プロジェクト情報表示
 ```
 
 ## 📊 リスクレベル
@@ -65,43 +106,43 @@ DNSweeper CLIは以下の5段階でリスクを評価します：
 
 ```bash
 # CSVファイルを分析
-dnssweeper analyze dns-records.csv
+dnsweeper analyze dns-records.csv
 
 # 詳細な出力
-dnssweeper analyze dns-records.csv --verbose
+dnsweeper analyze dns-records.csv --verbose
 
 # 英語モードで実行
-dnssweeper analyze dns-records.csv --english
+dnsweeper analyze dns-records.csv --english
 ```
 
 ### 出力形式の指定
 
 ```bash
 # テーブル形式（デフォルト）
-dnssweeper analyze dns-records.csv --output table
+dnsweeper analyze dns-records.csv --output table
 
 # JSON形式
-dnssweeper analyze dns-records.csv --output json
+dnsweeper analyze dns-records.csv --output json
 
 # CSV形式
-dnssweeper analyze dns-records.csv --output csv
+dnsweeper analyze dns-records.csv --output csv
 ```
 
 ### リスクレベルフィルタリング
 
 ```bash
 # 高リスク以上のレコードのみ表示
-dnssweeper analyze dns-records.csv --risk-level high
+dnsweeper analyze dns-records.csv --risk-level high
 
 # クリティカルなレコードのみ表示
-dnssweeper analyze dns-records.csv --risk-level critical
+dnsweeper analyze dns-records.csv --risk-level critical
 ```
 
 ### 結果をファイルに保存
 
 ```bash
 # 分析結果を運用フロー対応CSVファイルに保存
-dnssweeper analyze dns-records.csv --output-file results.csv
+dnsweeper analyze dns-records.csv --output-file results.csv
 ```
 
 ## 🛠️ オプション
@@ -201,6 +242,51 @@ www,CNAME,example.com,,3600
 - `Content`: レコードの値
 - `TTL`: Time To Live
 
+## 🧑‍💻 開発者向けガイド
+
+### コミット方法
+規約に沿ったコミットメッセージを作成するには：
+
+```bash
+npm run commit
+```
+
+または手動で：
+```bash
+git commit -m "feat: 新機能の追加"
+git commit -m "fix: バグの修正"
+git commit -m "docs: ドキュメントの更新"
+git commit -m "style: コードスタイルの修正"
+git commit -m "refactor: リファクタリング"
+git commit -m "perf: パフォーマンス改善"
+git commit -m "test: テストの追加・修正"
+git commit -m "chore: ビルドプロセスやツールの変更"
+```
+
+### コードフォーマット
+```bash
+# フォーマットチェック
+npm run format:check
+
+# 自動フォーマット
+npm run format
+
+# ESLintチェック
+npm run lint
+
+# ESLint自動修正
+npm run lint:fix
+```
+
+### 品質チェック
+```bash
+# 総合品質チェック（型チェック、Lint、テスト）
+npm run quality-check
+
+# 自動修正付き品質チェック
+npm run quality-check:fix
+```
+
 ## 🗓️ 月次DNS棚卸しガイド
 
 ### 段階的ハイブリッド方式での運用フロー
@@ -209,10 +295,10 @@ www,CNAME,example.com,,3600
 
 ```bash
 # 1. 高リスクレコードを抽出（プロバイダーは自動検出）
-dnssweeper analyze dns-export.csv --risk-level=high --output-file=monthly-audit.csv
+dnsweeper analyze dns-export.csv --risk-level=high --output-file=monthly-audit.csv
 
 # 2. 特定のプロバイダーを指定する場合
-dnssweeper analyze route53-export.csv --provider route53 --risk-level=high --output-file=monthly-audit.csv
+dnsweeper analyze route53-export.csv --provider route53 --risk-level=high --output-file=monthly-audit.csv
 
 # 3. 結果確認  
 echo "抽出完了: monthly-audit.csv"
@@ -252,13 +338,13 @@ echo "抽出完了: monthly-audit.csv"
 
 ```bash
 # ストリーミングモードで実行（メモリ効率的）
-dnssweeper analyze large-dns-records.csv --stream
+dnsweeper analyze large-dns-records.csv --stream
 
 # メモリ使用量を制限（50MB以下）
-dnssweeper analyze huge-dns-records.csv --stream --memory-limit 50
+dnsweeper analyze huge-dns-records.csv --stream --memory-limit 50
 
 # チャンクサイズを調整（デフォルト: 1000）
-dnssweeper analyze huge-dns-records.csv --stream --chunk-size 5000
+dnsweeper analyze huge-dns-records.csv --stream --chunk-size 5000
 ```
 
 ### パフォーマンス比較
@@ -281,8 +367,8 @@ dnssweeper analyze huge-dns-records.csv --stream --chunk-size 5000
 
 ```bash
 # リポジトリをクローン
-git clone https://github.com/your-username/dnssweeper-cli.git
-cd dnssweeper-cli
+git clone https://github.com/your-username/dnsweeper-cli.git
+cd dnsweeper-cli
 
 # 依存関係をインストール
 pnpm install  # または npm install
@@ -335,7 +421,7 @@ pnpm run lint  # または npm run lint
 
 ## 🆘 サポート
 
-問題やバグを発見した場合は、[GitHub Issues](https://github.com/your-username/dnssweeper-cli/issues)に報告してください。
+問題やバグを発見した場合は、[GitHub Issues](https://github.com/your-username/dnsweeper-cli/issues)に報告してください。
 
 ## 📝 更新履歴
 

@@ -88,7 +88,7 @@ export abstract class BaseProvider implements DNSProvider {
     }
     
     // TTLの検証
-    if (record.ttl < 0 || record.ttl > 2147483647) {
+    if (record.ttl !== undefined && (record.ttl < 0 || record.ttl > 2147483647)) {
       return false;
     }
     

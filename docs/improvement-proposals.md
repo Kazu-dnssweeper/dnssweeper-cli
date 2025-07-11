@@ -54,7 +54,7 @@
 **提案**: inquirer.js を使用した対話型インターフェース
 
 ```
-$ dnssweeper analyze --interactive
+$ dnsweeper analyze --interactive
 ? CSVファイルを選択してください: ./dns-records.csv
 ? 出力形式を選択してください: (Use arrow keys)
 ❯ テーブル表示

@@ -18,6 +18,7 @@ import {
 } from '../utils/formatter';
 import { getMessages } from '../utils/messages';
 import { filterByRiskLevel } from '../patterns/patternMatcher';
+import type { DNSRecord } from '../types/dns';
 import { promises as fs } from 'fs';
 
 interface AnalyzeOptions {
@@ -26,15 +27,17 @@ interface AnalyzeOptions {
   verbose?: boolean;
   riskLevel?: 'critical' | 'high' | 'medium' | 'low';
   outputFile?: string;
+  patterns?: string;
+  provider?: string;
 }
 
 /**
  * analyzeコマンドのメイン実装
- * @param file - 分析するCSVファイルのパス
+ * @param files - 分析するCSVファイルのパス（複数可）
  * @param options - コマンドオプション
  */
 export async function analyzeCommand(
-  file: string,
+  files: string[],
   options: AnalyzeOptions,
 ): Promise<void> {
   // 言語設定
@@ -45,10 +48,14 @@ export async function analyzeCommand(
   const isCI = process.env.CI === 'true' || process.env.NODE_ENV === 'test';
   const spinner = isCI 
     ? { 
-      start: () => ({ text: '', succeed: () => {}, fail: () => {} }), 
+      start: (): { text: string; succeed: () => void; fail: () => void } => ({ 
+        text: '', 
+        succeed: (): void => {}, 
+        fail: (): void => {}, 
+      }), 
       text: '',
-      succeed: () => {},
-      fail: () => {},
+      succeed: (): void => {},
+      fail: (): void => {},
     }
     : ora(messages.app.analyzing).start();
 
@@ -56,9 +63,15 @@ export async function analyzeCommand(
     // 実行時間の計測開始
     const startTime = Date.now();
 
-    console.log(chalk.blue(messages.app.title));
-    console.log(chalk.gray(`${messages.app.target}: ${file}`));
-    console.log(chalk.gray(`${messages.app.outputFormat}: ${options.output}`));
+    // JSON出力時は余計な出力を抑制
+    if (options.output !== 'json') {
+      console.log(chalk.blue(messages.app.title));
+      const targetMsg = files.length > 1 
+        ? `${messages.app.target}: ${files.length}個のファイル`
+        : `${messages.app.target}: ${files[0]}`;
+      console.log(chalk.gray(targetMsg));
+      console.log(chalk.gray(`${messages.app.outputFormat}: ${options.output}`));
+    }
 
     // パターン設定の読み込み
     if (!isCI) {
@@ -67,21 +80,38 @@ export async function analyzeCommand(
           ? 'パターン設定を読み込み中...'
           : 'Loading pattern configuration...';
     }
-    const patternConfig = await loadPatternConfig();
+    const patternConfig = await loadPatternConfig(options.patterns);
 
-    // CSVファイルの解析
-    if (!isCI) {
-      spinner.text =
-        language === 'ja' ? 'CSVファイルを解析中...' : 'Parsing CSV file...';
+    // 全ファイルからレコードを読み込み
+    let allRecords: DNSRecord[] = [];
+    const detectedProviders: Set<string> = new Set();
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (!isCI) {
+        spinner.text =
+          language === 'ja' 
+            ? `CSVファイルを解析中... (${i + 1}/${files.length}): ${file}` 
+            : `Parsing CSV file... (${i + 1}/${files.length}): ${file}`;
+      }
+      const records = await parseDNSRecordsFromCSV(file, options.provider);
+      
+      // プロバイダー情報を記録
+      if (records.length > 0 && records[0].provider) {
+        detectedProviders.add(records[0].provider);
+      }
+      
+      allRecords = allRecords.concat(records);
     }
-    const records = await parseDNSRecordsFromCSV(file);
 
     // DNSレコードの分析
     if (!isCI) {
       spinner.text =
-        language === 'ja' ? 'DNSレコードを分析中...' : 'Analyzing DNS records...';
+        language === 'ja' 
+          ? `${allRecords.length}件のDNSレコードを分析中...` 
+          : `Analyzing ${allRecords.length} DNS records...`;
     }
-    const analysisResults = analyzeRecords(records, patternConfig, language);
+    const analysisResults = analyzeRecords(allRecords, patternConfig, language);
 
     // 結果をリスクスコア順でソート
     let sortedResults = sortByRiskScore(analysisResults);
@@ -122,9 +152,15 @@ export async function analyzeCommand(
 
     // 出力形式に応じた結果表示
     switch (options.output) {
-    case 'json':
-      console.log(formatAsJSON(sortedResults, summary));
+    case 'json': {
+      // JSON出力時はサマリーにプロバイダー情報を追加
+      const summaryWithProvider: any = {
+        ...summary,
+        detectedProvider: detectedProviders.size > 0 ? Array.from(detectedProviders)[0] : undefined,
+      };
+      console.log(formatAsJSON(sortedResults, summaryWithProvider));
       break;
+    }
 
     case 'csv':
       console.log(formatAsCSV(sortedResults));

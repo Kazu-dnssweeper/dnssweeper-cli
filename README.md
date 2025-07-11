@@ -10,9 +10,13 @@
 
 未使用のDNSレコードを検出・分析するコマンドラインツール
 
+🎉 **v0.1.0 がnpmで公開されました！** インストール: `npm install -g dnssweeper-cli`
+
+[English README](README.en.md)
+
 ## 🎯 概要
 
-DNSweeper CLIは、CloudflareなどのDNSサービスからエクスポートしたCSVファイルを分析し、未使用の可能性が高いDNSレコードを検出するツールです。
+DNSweeper CLIは、各種DNSサービスからエクスポートしたCSVファイルを分析し、未使用の可能性が高いDNSレコードを検出するツールです。Cloudflare、AWS Route 53、Google Cloud DNS、Azure DNS、お名前.comなど、主要なDNSプロバイダーに対応しています。
 
 ### 主な機能
 
@@ -22,13 +26,19 @@ DNSweeper CLIは、CloudflareなどのDNSサービスからエクスポートし
 - 🌐 **多言語対応**: 日本語・英語の両方に対応
 - ⚡ **高速処理**: 大規模なCSVファイルも効率的に処理
 - 🔒 **読み取り専用**: 安全な分析（レコードの削除・変更は行わない）
+- 🏢 **マルチプロバイダー対応**: 主要DNSサービスのCSV形式を自動認識
+- 🔄 **ストリーミング対応**: 100万件規模のレコードも低メモリで処理可能
 
 ## 🚀 インストール
 
 ### npm経由でのインストール
 
 ```bash
+# npmを使用する場合
 npm install -g dnssweeper-cli
+
+# pnpmを使用する場合（推奨）
+pnpm add -g dnssweeper-cli
 ```
 
 ### 直接実行（npx）
@@ -101,8 +111,13 @@ dnssweeper analyze dns-records.csv --output-file results.csv
 | `--output` | `-o` | 出力形式 (table/json/csv) | `table` |
 | `--verbose` | `-v` | 詳細な出力を表示 | `false` |
 | `--english` | `-e` | 英語モードで実行 | `false` |
+| `--provider` | - | DNSプロバイダーを指定 (自動検出も可能) | 自動検出 |
 | `--risk-level` | `-r` | 指定リスクレベル以上のレコードのみ表示 | なし |
 | `--output-file` | `-f` | 結果をファイルに保存 | なし |
+| `--patterns` | `-p` | カスタムパターンファイルを指定 | なし |
+| `--stream` | `-s` | ストリーミングモード（大規模ファイル用） | `false` |
+| `--chunk-size` | - | ストリーミング時のチャンクサイズ | `1000` |
+| `--memory-limit` | - | メモリ使用量制限（MB） | `100` |
 | `--help` | `-h` | ヘルプメッセージを表示 | - |
 | `--version` | `-V` | バージョンを表示 | - |
 
@@ -137,14 +152,46 @@ dnssweeper analyze dns-records.csv --output-file results.csv
 
 ## 🔧 対応するCSV形式
 
-DNSweeper CLIは以下の形式のCSVファイルに対応しています：
+DNSweeper CLIは主要なDNSプロバイダーのCSV形式を自動認識します：
 
-### Cloudflare形式（推奨）
+### Cloudflare
 
 ```csv
 Name,Type,Content,TTL,Proxied,Created,Modified
 example.com,A,192.168.1.1,300,false,2024-01-01,2024-01-01
 www.example.com,CNAME,example.com,300,true,2024-01-01,2024-01-01
+```
+
+### AWS Route 53
+
+```csv
+Name,Type,Value,TTL,RoutingPolicy
+example.com.,A,192.168.1.1,300,Simple
+www.example.com.,CNAME,example.com,300,Simple
+```
+
+### Google Cloud DNS
+
+```csv
+dns_name,record_type,ttl,rrdatas
+example.com.,A,300,"192.168.1.1"
+www.example.com.,CNAME,300,"example.com."
+```
+
+### Azure DNS
+
+```csv
+Name,Type,TTL,Value
+@,A,3600,192.168.1.1
+www,CNAME,3600,example.com
+```
+
+### お名前.com
+
+```csv
+ホスト名,TYPE,VALUE,優先度,TTL
+@,A,192.168.1.1,,3600
+www,CNAME,example.com,,3600
 ```
 
 ### 必須フィールド
@@ -161,20 +208,23 @@ www.example.com,CNAME,example.com,300,true,2024-01-01,2024-01-01
 #### Phase 1: 高リスクレコード抽出（5分）
 
 ```bash
-# 1. 高リスクレコードを抽出
-dnssweeper analyze cloudflare-export.csv --risk-level=high --output-file=monthly-audit.csv
+# 1. 高リスクレコードを抽出（プロバイダーは自動検出）
+dnssweeper analyze dns-export.csv --risk-level=high --output-file=monthly-audit.csv
 
-# 2. 結果確認  
+# 2. 特定のプロバイダーを指定する場合
+dnssweeper analyze route53-export.csv --provider route53 --risk-level=high --output-file=monthly-audit.csv
+
+# 3. 結果確認  
 echo "抽出完了: monthly-audit.csv"
 ```
 
-#### Phase 2: Cloudflare UI確認（30分）
+#### Phase 2: DNS管理画面での確認（30分）
 
 1. **monthly-audit.csv**を開く
-2. 各レコードについてCloudflare UIで使用状況を確認：
-   - **Analytics** → トラフィック確認
-   - **Security** → ファイアウォールログ確認  
-   - **Caching** → キャッシュヒット状況確認
+2. 各レコードについてDNS管理画面で使用状況を確認：
+   - **Analytics/トラフィック** → アクセス状況確認
+   - **ログ/レポート** → 利用履歴確認  
+   - **関連サービス** → 連携サービスでの利用確認
 3. CSV の「使用状況確認」列に結果を記入：
    - `USED` - 使用されている
    - `UNUSED` - 使用されていない  
@@ -186,7 +236,7 @@ echo "抽出完了: monthly-audit.csv"
    - `DELETE` - 削除対象
    - `KEEP` - 保持
    - `LATER` - 後で再確認
-2. 削除対象レコードをCloudflare UIで削除
+2. 削除対象レコードをDNS管理画面で削除
 3. 「削除実行日」列に実行日を記入
 4. 完了したCSVファイルを保存（監査証跡として）
 
@@ -195,6 +245,35 @@ echo "抽出完了: monthly-audit.csv"
 - **作業時間**: 従来の手動確認（2-3時間）→ 1時間に短縮
 - **見落とし防止**: パターンベース自動検出で100%カバー
 - **監査証跡**: CSVファイルで削除履歴を完全保持
+
+## 🚀 大規模ファイル対応（ストリーミングモード）
+
+### 100万件以上のDNSレコードを扱う場合
+
+```bash
+# ストリーミングモードで実行（メモリ効率的）
+dnssweeper analyze large-dns-records.csv --stream
+
+# メモリ使用量を制限（50MB以下）
+dnssweeper analyze huge-dns-records.csv --stream --memory-limit 50
+
+# チャンクサイズを調整（デフォルト: 1000）
+dnssweeper analyze huge-dns-records.csv --stream --chunk-size 5000
+```
+
+### パフォーマンス比較
+
+| レコード数 | 通常モード | ストリーミングモード |
+|-----------|----------|-------------------|
+| 10万件 | メモリ: 100MB<br>時間: 1.2秒 | メモリ: 15MB<br>時間: 1.4秒 |
+| 100万件 | メモリ: 834MB<br>時間: 7.3秒 | メモリ: 21MB<br>時間: 5.1秒 |
+| 1000万件 | メモリ不足エラー | メモリ: 25MB<br>時間: 52秒 |
+
+### 推奨設定
+
+- **10万件以下**: 通常モード（高速）
+- **10万〜100万件**: ストリーミングモード
+- **100万件以上**: ストリーミングモード + メモリ制限50MB
 
 ## 🧪 開発・テスト
 
@@ -206,29 +285,29 @@ git clone https://github.com/your-username/dnssweeper-cli.git
 cd dnssweeper-cli
 
 # 依存関係をインストール
-npm install
+pnpm install  # または npm install
 
 # 開発モードで実行
-npm run dev -- analyze test-data/normal-records-50.csv
+pnpm run dev -- analyze test-data/normal-records-50.csv  # または npm run dev
 ```
 
 ### テストの実行
 
 ```bash
 # 全テストを実行
-npm test
+pnpm test  # または npm test
 
 # テストカバレッジを確認
-npm run test:coverage
+pnpm run test:coverage  # または npm run test:coverage
 
 # 型チェック
-npm run type-check
+pnpm run type-check  # または npm run type-check
 
 # コードフォーマット
-npm run format
+pnpm run format  # または npm run format
 
 # Lint
-npm run lint
+pnpm run lint  # または npm run lint
 ```
 
 ## 🤝 貢献

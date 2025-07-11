@@ -44,6 +44,10 @@ Thumbs.db
 # TypeScript
 *.tsbuildinfo
 
+# pnpm
+pnpm-lock.yaml
+.pnpm-store/
+
 # Claude Code設定（ローカル）
 .claude/settings.local.json
 .claude.json

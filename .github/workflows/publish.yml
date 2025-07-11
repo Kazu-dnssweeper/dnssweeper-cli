@@ -26,29 +26,34 @@ jobs:
       with:
         node-version: '18.x'
         registry-url: 'https://registry.npmjs.org'
-        cache: 'npm'
+    
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 9
+        run_install: false
     
     - name: Install dependencies
-      run: npm ci
+      run: pnpm install --frozen-lockfile
     
     - name: Build project
-      run: npm run build
+      run: pnpm run build
     
     - name: Run tests
-      run: npm test -- --passWithNoTests --ci
+      run: pnpm test -- --passWithNoTests --ci
     
     - name: Update version (if manual trigger)
       if: github.event_name == 'workflow_dispatch'
       run: |
-        npm version ${{ github.event.inputs.version }} --no-git-tag-version
+        pnpm version ${{ github.event.inputs.version }} --no-git-tag-version
         git config user.name "GitHub Actions"
         git config user.email "actions@github.com"
-        git add package.json package-lock.json
+        git add package.json pnpm-lock.yaml
         git commit -m "chore: bump version to ${{ github.event.inputs.version }}"
         git push
     
     - name: Publish to npm with provenance
-      run: npm publish --provenance --access public
+      run: pnpm publish --no-git-checks --access public
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     

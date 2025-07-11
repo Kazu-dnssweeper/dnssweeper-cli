@@ -44,8 +44,8 @@ export function printAnalysisSummary(
       summary.totalRecords > 0
         ? Math.round((count / summary.totalRecords) * 100)
         : 0;
-    const colorFunc = (chalk as any)[color];
-    console.log(`  ${symbol} ${label}: ${colorFunc(count)} (${percentage}%)`);
+    const colorFunc = chalk[color as keyof typeof chalk] as (text: string) => string;
+    console.log(`  ${symbol} ${label}: ${colorFunc(String(count))} (${percentage}%)`);
   }
 
   // 高リスクレコード数の強調表示

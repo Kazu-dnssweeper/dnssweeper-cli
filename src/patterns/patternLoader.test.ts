@@ -90,8 +90,8 @@ describe('patternLoader', () => {
     });
 
     it('バージョン情報がない設定でエラーが発生する', async () => {
-      const invalidConfig = { ...validConfig };
-      delete (invalidConfig as any).version;
+      const invalidConfig = { ...validConfig } as Partial<PatternConfig>;
+      delete invalidConfig.version;
       await fs.writeFile(tempPatternFile, JSON.stringify(invalidConfig));
 
       await expect(loadPatternConfig(tempPatternFile)).rejects.toThrow(
@@ -100,8 +100,8 @@ describe('patternLoader', () => {
     });
 
     it('パターン定義がない設定でエラーが発生する', async () => {
-      const invalidConfig = { ...validConfig };
-      delete (invalidConfig as any).patterns;
+      const invalidConfig = { ...validConfig } as Partial<PatternConfig>;
+      delete invalidConfig.patterns;
       await fs.writeFile(tempPatternFile, JSON.stringify(invalidConfig));
 
       await expect(loadPatternConfig(tempPatternFile)).rejects.toThrow(
@@ -125,8 +125,8 @@ describe('patternLoader', () => {
     });
 
     it('スコアリング設定がない設定でエラーが発生する', async () => {
-      const invalidConfig = { ...validConfig };
-      delete (invalidConfig as any).scoring;
+      const invalidConfig = { ...validConfig } as Partial<PatternConfig>;
+      delete invalidConfig.scoring;
       await fs.writeFile(tempPatternFile, JSON.stringify(invalidConfig));
 
       await expect(loadPatternConfig(tempPatternFile)).rejects.toThrow(
@@ -135,8 +135,8 @@ describe('patternLoader', () => {
     });
 
     it('閾値設定がない設定でエラーが発生する', async () => {
-      const invalidConfig = { ...validConfig };
-      delete (invalidConfig as any).thresholds;
+      const invalidConfig = { ...validConfig } as Partial<PatternConfig>;
+      delete invalidConfig.thresholds;
       await fs.writeFile(tempPatternFile, JSON.stringify(invalidConfig));
 
       await expect(loadPatternConfig(tempPatternFile)).rejects.toThrow(

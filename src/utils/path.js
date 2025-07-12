@@ -86,7 +86,7 @@ class PathUtils {
     if (process.platform === 'win32' && isUNC) {
       // path.normalizeがUNCパスの\\を削除する場合があるため復元
       if (!normalized.startsWith('\\\\')) {
-        normalized = '\\\\' + normalized.replace(/^[\\/]+/, '');
+        normalized = '\\\\' + normalized.replace(/^[\\\\//]+/, '');
       }
     }
 
@@ -180,10 +180,14 @@ class PathUtils {
    */
   static sanitizeFilename(filename) {
     // Windowsで無効な文字
-    const invalidChars = /[<>:"|?*\u0000-\u001f]/g;
+    const invalidChars = /[<>:"|?*]/g;
+    
+    // 制御文字 (0-31) も置換
+    // eslint-disable-next-line no-control-regex
+    const controlChars = /[\x00-\x1f]/g;
 
     // 無効な文字を置換
-    let sanitized = filename.replace(invalidChars, '_');
+    let sanitized = filename.replace(invalidChars, '_').replace(controlChars, '_');
 
     // 先頭と末尾の空白とドットを削除
     sanitized = sanitized.trim().replace(/^\.+|\.+$/g, '');

@@ -76,7 +76,7 @@ export const CommandSchema = z.enum(['analyze', 'config', 'validate', 'help', 'v
 export const CLIArgumentsSchema = z.object({
   command: CommandSchema,
   args: z.array(z.string()),
-  options: z.record(z.unknown()),
+  options: z.record(z.string(), z.unknown()),
 });
 
 // 型エクスポート
@@ -111,7 +111,7 @@ export function validateAnalyzeOptions(options: unknown): AnalyzeOptions {
 export const FilePathSchema = z.string().refine(
   (path) => {
     // 基本的なパスの妥当性チェック
-    if (!path || path.length === 0) return false;
+    if (!path || path.length === 0) {return false;}
     
     // 危険な文字のチェック
     const dangerousChars = ['../', '\\..', '\0'];
@@ -161,7 +161,7 @@ export function parseNumericOption(value: string, name: string, min?: number, ma
  * ブール値オプションのバリデーション
  */
 export function parseBooleanOption(value: string | boolean, name: string): boolean {
-  if (typeof value === 'boolean') return value;
+  if (typeof value === 'boolean') {return value;}
   
   const lowerValue = value.toLowerCase();
   if (lowerValue === 'true' || lowerValue === '1' || lowerValue === 'yes') {

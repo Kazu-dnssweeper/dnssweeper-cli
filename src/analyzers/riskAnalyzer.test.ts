@@ -1,3 +1,4 @@
+import { SpyInstance } from "vitest";
 /**
  * riskAnalyzer.ts のユニットテスト
  */
@@ -10,7 +11,7 @@ import {
   getCommonRiskPatterns,
   analyzeRiskByTime,
 } from './riskAnalyzer';
-import { AnalysisResult, RiskLevel } from '../types/dns';
+import { IAnalysisResult, RiskLevel } from '../types/dns';
 
 // モックデータ作成ヘルパー
 const createMockResult = (
@@ -19,7 +20,7 @@ const createMockResult = (
   riskLevel: RiskLevel,
   patterns: string[] = [],
   modified: string = '2024-01-01T00:00:00Z',
-): AnalysisResult => ({
+): IAnalysisResult => ({
   record: {
     name,
     type: 'A',
@@ -37,7 +38,7 @@ const createMockResult = (
 
 describe('riskAnalyzer', () => {
   describe('generateAnalysisSummary', () => {
-    const mockResults: AnalysisResult[] = [
+    const mockResults: IAnalysisResult[] = [
       createMockResult('critical.com', 100, 'critical'),
       createMockResult('high1.com', 80, 'high'),
       createMockResult('high2.com', 75, 'high'),
@@ -99,7 +100,7 @@ describe('riskAnalyzer', () => {
   });
 
   describe('getRecommendedForDeletion', () => {
-    const mockResults: AnalysisResult[] = [
+    const mockResults: IAnalysisResult[] = [
       createMockResult('critical.com', 100, 'critical'),
       createMockResult('high.com', 80, 'high'),
       createMockResult('medium.com', 60, 'medium'),
@@ -129,7 +130,7 @@ describe('riskAnalyzer', () => {
   });
 
   describe('calculateStatistics', () => {
-    const mockResults: AnalysisResult[] = [
+    const mockResults: IAnalysisResult[] = [
       createMockResult('r1', 100, 'critical'),
       createMockResult('r2', 80, 'high'),
       createMockResult('r3', 60, 'medium'),
@@ -168,7 +169,7 @@ describe('riskAnalyzer', () => {
   });
 
   describe('getCommonRiskPatterns', () => {
-    const mockResults: AnalysisResult[] = [
+    const mockResults: IAnalysisResult[] = [
       createMockResult('r1', 100, 'critical', ['prefix:old-', 'suffix:-test']),
       createMockResult('r2', 80, 'high', ['prefix:old-']),
       createMockResult('r3', 60, 'medium', [
@@ -191,7 +192,7 @@ describe('riskAnalyzer', () => {
     });
 
     it('最大10件まで返す', () => {
-      const manyPatterns: AnalysisResult[] = [];
+      const manyPatterns: IAnalysisResult[] = [];
       for (let i = 0; i < 15; i++) {
         manyPatterns.push(
           createMockResult(`r${i}`, 50, 'medium', [`pattern${i}`]),
@@ -204,7 +205,7 @@ describe('riskAnalyzer', () => {
   });
 
   describe('analyzeRiskByTime', () => {
-    const mockResults: AnalysisResult[] = [
+    const mockResults: IAnalysisResult[] = [
       createMockResult('r1', 100, 'critical', [], '2022-01-01T00:00:00Z'),
       createMockResult('r2', 80, 'high', [], '2022-06-01T00:00:00Z'),
       createMockResult('r3', 60, 'medium', [], '2023-01-01T00:00:00Z'),
@@ -251,5 +252,5 @@ describe('riskAnalyzer', () => {
 // テスト終了後のクリーンアップ
 afterAll(() => {
   // モックをクリア
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });

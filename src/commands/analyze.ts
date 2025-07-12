@@ -7,21 +7,20 @@ import chalk from 'chalk';
 import ora from 'ora';
 import { parseDNSRecordsFromCSV } from '../parsers/csvParser';
 import { loadPatternConfig } from '../patterns/patternLoader';
-import { analyzeRecords, sortByRiskScore } from '../patterns/patternMatcher';
+import { analyzeRecords, filterByRiskLevel, sortByRiskScore } from '../patterns/patternMatcher';
 import { generateAnalysisSummary } from '../analyzers/riskAnalyzer';
 import {
-  printAnalysisSummary,
-  printAnalysisTable,
-  formatAsJSON,
   formatAsCSV,
   formatAsDetailedCSV,
+  formatAsJSON,
+  printAnalysisSummary,
+  printAnalysisTable,
 } from '../utils/formatter';
 import { getMessages } from '../utils/messages';
-import { filterByRiskLevel } from '../patterns/patternMatcher';
-import type { DNSRecord } from '../types/dns';
+import type { IDNSRecord } from '../types/dns';
 import { promises as fs } from 'fs';
 
-interface AnalyzeOptions {
+interface IAnalyzeOptions {
   output: 'table' | 'json' | 'csv';
   english?: boolean;
   verbose?: boolean;
@@ -38,7 +37,7 @@ interface AnalyzeOptions {
  */
 export async function analyzeCommand(
   files: string[],
-  options: AnalyzeOptions,
+  options: IAnalyzeOptions,
 ): Promise<void> {
   // 言語設定
   const language = options.english ? 'en' : 'ja';
@@ -83,7 +82,7 @@ export async function analyzeCommand(
     const patternConfig = await loadPatternConfig(options.patterns);
 
     // 全ファイルからレコードを読み込み
-    let allRecords: DNSRecord[] = [];
+    let allRecords: IDNSRecord[] = [];
     const detectedProviders: Set<string> = new Set();
     
     for (let i = 0; i < files.length; i++) {

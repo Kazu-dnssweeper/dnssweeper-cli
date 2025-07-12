@@ -3,7 +3,7 @@
  */
 
 import { BaseProvider } from './BaseProvider';
-import { DNSRecord } from '../types/dns';
+import { IDNSRecord } from '../types/dns';
 
 export class GoogleCloudProvider extends BaseProvider {
   name = 'google-cloud';
@@ -26,7 +26,7 @@ export class GoogleCloudProvider extends BaseProvider {
   /**
    * Google Cloud DNSのCSV行をパース
    */
-  parse(row: any, headers: string[]): DNSRecord | null {
+  parse(row: any, headers: string[]): IDNSRecord | null {
     try {
       // ヘッダーとインデックスのマッピングを作成
       const headerMap = new Map<string, number>();
@@ -47,7 +47,7 @@ export class GoogleCloudProvider extends BaseProvider {
       // rrdatasは配列形式または文字列の可能性がある
       const dataValues = this.parseRRDatas(rrdatas);
       
-      const record: DNSRecord = {
+      const record: IDNSRecord = {
         name: this.normalizeDomainName(name),
         type: this.normalizeRecordType(type),
         content: dataValues[0], // 最初の値をメインコンテンツとする

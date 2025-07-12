@@ -10,7 +10,7 @@ import Papa from 'papaparse';
 import { loadPatternConfig } from '../patterns/patternLoader';
 import { analyzeRecord } from '../patterns/patternMatcher';
 import { getMessages } from '../utils/messages';
-import type { DNSRecord, RiskLevel } from '../types/dns';
+import type { IDNSRecord, RiskLevel } from '../types/dns';
 import { createWriteStream } from 'fs';
 
 interface StreamStats {
@@ -19,7 +19,7 @@ interface StreamStats {
   processingTime: number;
   peakMemory: number;
   topRiskyRecords: Array<{
-    record: DNSRecord;
+    record: IDNSRecord;
     riskScore: number;
     riskLevel: RiskLevel;
   }>;
@@ -57,7 +57,7 @@ function getRiskLevelPriority(level: RiskLevel): number {
  */
 class TopRecordsManager {
   private records: Array<{
-    record: DNSRecord;
+    record: IDNSRecord;
     riskScore: number;
     riskLevel: RiskLevel;
   }> = [];
@@ -68,7 +68,7 @@ class TopRecordsManager {
     this.maxSize = maxSize;
   }
 
-  add(record: DNSRecord, riskScore: number, riskLevel: RiskLevel): void {
+  add(record: IDNSRecord, riskScore: number, riskLevel: RiskLevel): void {
     // 最小スコアより低い場合はスキップ
     if (this.records.length >= this.maxSize && riskScore <= this.minScore) {
       return;
@@ -159,10 +159,10 @@ export async function analyzeStreamOptimizedCommand(
           transformHeader: (header: string) => header.trim(),
           transform: (value: string) => value.trim(),
           step: (row: any) => {
-            if (row.errors.length > 0) return;
+            if (row.errors.length > 0) {return;}
 
             const data = row.data as Record<string, any>;
-            const record: DNSRecord = {
+            const record: IDNSRecord = {
               name: data.Name || '',
               type: data.Type || '',
               content: data.Content || '',
@@ -173,7 +173,7 @@ export async function analyzeStreamOptimizedCommand(
             };
 
             // バリデーション
-            if (!record.name || !record.type) return;
+            if (!record.name || !record.type) {return;}
 
             // レコード分析
             const result = analyzeRecord(record, patternConfig);
@@ -182,7 +182,7 @@ export async function analyzeStreamOptimizedCommand(
             if (options.riskLevel) {
               const priority = getRiskLevelPriority(result.riskLevel);
               const minPriority = getRiskLevelPriority(options.riskLevel);
-              if (priority < minPriority) return;
+              if (priority < minPriority) {return;}
             }
 
             // 統計更新

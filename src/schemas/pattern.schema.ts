@@ -92,7 +92,7 @@ export const PatternsConfigSchema = z.object({
   customRules: z.array(z.object({
     name: z.string(),
     type: z.string(),
-    config: z.record(z.unknown()),
+    config: z.record(z.string(), z.unknown()),
   })).optional(),
 });
 
@@ -191,7 +191,7 @@ export function checkDuplicatePatterns(config: PatternsConfig): PatternValidatio
  * パターンのパフォーマンスをチェック
  */
 export function checkPatternPerformance(pattern: string, type: 'regex' | 'other'): boolean {
-  if (type !== 'regex') return true;
+  if (type !== 'regex') {return true;}
   
   try {
     new RegExp(pattern);
@@ -228,18 +228,18 @@ export function testPatternMatch(
   switch (type) {
     case 'prefix':
       matched = text.toLowerCase().startsWith(rule.pattern.toLowerCase());
-      if (matched) matchedText = text.substring(0, rule.pattern.length);
+      if (matched) {matchedText = text.substring(0, rule.pattern.length);}
       break;
       
     case 'suffix':
       matched = text.toLowerCase().endsWith(rule.pattern.toLowerCase());
-      if (matched) matchedText = text.substring(text.length - rule.pattern.length);
+      if (matched) {matchedText = text.substring(text.length - rule.pattern.length);}
       break;
       
     case 'contains':
       const index = text.toLowerCase().indexOf(rule.pattern.toLowerCase());
       matched = index !== -1;
-      if (matched) matchedText = text.substring(index, index + rule.pattern.length);
+      if (matched) {matchedText = text.substring(index, index + rule.pattern.length);}
       break;
       
     case 'regex':
@@ -247,7 +247,7 @@ export function testPatternMatch(
         const regex = new RegExp(rule.pattern, (rule as RegexPatternRule).flags || 'i');
         const match = text.match(regex);
         matched = match !== null;
-        if (matched && match) matchedText = match[0];
+        if (matched && match) {matchedText = match[0];}
       } catch {
         matched = false;
       }

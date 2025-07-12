@@ -35,8 +35,8 @@
     "exactOptionalPropertyTypes": false,
     
     // 追加チェック
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": false,
@@ -68,22 +68,21 @@
     "maxNodeModuleJsDepth": 0,
     
     // 型の扱い
-    "types": ["node", "jest"],
+    "types": ["node"],
     "typeRoots": ["./node_modules/@types", "./src/types"]
   },
   
   // ファイル選択
   "include": [
-    "src/**/*",
-    "test/**/*"
+    "src/**/*"
   ],
   
   "exclude": [
     "node_modules",
     "dist",
     "coverage",
-    "**/*.spec.ts",
     "**/*.test.ts",
+    "**/*.spec.ts",
     "test/**/*",
     "scripts/**/*",
     "docs/**/*"

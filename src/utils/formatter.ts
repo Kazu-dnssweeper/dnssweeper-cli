@@ -3,7 +3,7 @@
  */
 
 import chalk from 'chalk';
-import { AnalysisResult, AnalysisSummary, RiskLevel } from '../types/dns';
+import { IAnalysisResult, IAnalysisSummary, RiskLevel } from '../types/dns';
 import { getRiskLevelColor } from '../analyzers/riskAnalyzer';
 import { getMessages, Language } from './messages';
 
@@ -14,7 +14,7 @@ import { getMessages, Language } from './messages';
  * @param language - 言語設定
  */
 export function printAnalysisSummary(
-  summary: AnalysisSummary,
+  summary: IAnalysisSummary,
   verbose = false,
   language: Language = 'ja',
 ): void {
@@ -45,7 +45,8 @@ export function printAnalysisSummary(
         ? Math.round((count / summary.totalRecords) * 100)
         : 0;
     const colorFunc = chalk[color as keyof typeof chalk] as (text: string) => string;
-    console.log(`  ${symbol} ${label}: ${colorFunc(String(count))} (${percentage}%)`);
+    const coloredCount = colorFunc ? colorFunc(String(count)) : String(count);
+    console.log(`  ${symbol} ${label}: ${coloredCount} (${percentage}%)`);
   }
 
   // 高リスクレコード数の強調表示
@@ -53,7 +54,7 @@ export function printAnalysisSummary(
   if (highRiskCount > 0) {
     const itemUnit = language === 'ja' ? '件' : ' items';
     console.log(
-      `\n⚠️  ${chalk.red(messages.analysis.deleteRecommended)} ${chalk.redBright(highRiskCount)}${itemUnit}`,
+      `\n⚠️  ${chalk.red(messages.analysis.deleteRecommended)} ${chalk.red(highRiskCount)}${itemUnit}`,
     );
   } else {
     console.log(`\n✅ ${chalk.green(messages.analysis.noHighRisk)}`);
@@ -82,7 +83,7 @@ export function printAnalysisSummary(
  * @param language - 言語設定
  */
 export function printAnalysisTable(
-  results: AnalysisResult[],
+  results: IAnalysisResult[],
   limit = 20,
   minRiskLevel: RiskLevel = 'low',
   language: Language = 'ja',
@@ -144,8 +145,8 @@ export function printAnalysisTable(
  * @returns JSON文字列
  */
 export function formatAsJSON(
-  results: AnalysisResult[],
-  summary: AnalysisSummary,
+  results: IAnalysisResult[],
+  summary: IAnalysisSummary | null,
 ): string {
   const output = {
     summary,
@@ -168,7 +169,7 @@ export function formatAsJSON(
  * @param results - 分析結果の配列
  * @returns CSV文字列
  */
-export function formatAsCSV(results: AnalysisResult[]): string {
+export function formatAsCSV(results: IAnalysisResult[]): string {
   const headers = [
     'Name',
     'Type',
@@ -207,7 +208,7 @@ export function formatAsCSV(results: AnalysisResult[]): string {
  * @returns 詳細CSV文字列
  */
 export function formatAsDetailedCSV(
-  results: AnalysisResult[],
+  results: IAnalysisResult[],
   language: Language = 'ja',
 ): string {
   const messages = getMessages(language);
@@ -290,9 +291,9 @@ export function formatAsDetailedCSV(
  * リスクレベルでフィルタリング
  */
 function filterResultsByRiskLevel(
-  results: AnalysisResult[],
+  results: IAnalysisResult[],
   minRiskLevel: RiskLevel,
-): AnalysisResult[] {
+): IAnalysisResult[] {
   const riskLevelOrder: RiskLevel[] = [
     'safe',
     'low',
@@ -306,6 +307,64 @@ function filterResultsByRiskLevel(
     const resultIndex = riskLevelOrder.indexOf(result.riskLevel);
     return resultIndex >= minIndex;
   });
+}
+
+/**
+ * 結果を指定されたフォーマットで整形する
+ * @param results - 分析結果
+ * @param options - フォーマットオプション
+ * @returns フォーマットされた文字列
+ */
+export function formatResults(
+  results: IAnalysisResult[],
+  options: {
+    format?: 'table' | 'json' | 'csv';
+    language?: 'ja' | 'en';
+    verbose?: boolean;
+  }
+): string {
+  const format = options.format || 'table';
+  const language = options.language || 'ja';
+
+  switch (format) {
+    case 'json':
+      return formatAsJSON(results, null);
+    case 'csv':
+      return formatAsCSV(results);
+    case 'table':
+    default:
+      // テーブル形式の場合は、簡易的な出力を行う
+      const limit = options.verbose ? 50 : 20;
+      return formatAsSimpleTable(results, limit, language);
+  }
+}
+
+/**
+ * 簡易テーブル形式で結果を整形
+ */
+function formatAsSimpleTable(
+  results: IAnalysisResult[],
+  limit: number,
+  language: 'ja' | 'en'
+): string {
+  if (results.length === 0) {
+    return language === 'ja' 
+      ? '分析対象のレコードが見つかりませんでした。'
+      : 'No records found for analysis.';
+  }
+
+  const lines: string[] = [];
+  const displayResults = results.slice(0, limit);
+  
+  displayResults.forEach(result => {
+    lines.push(`${result.record.name} (${result.record.type}) - リスク: ${result.riskLevel} (${result.riskScore})`);
+  });
+
+  if (results.length > limit) {
+    lines.push(`... 他 ${results.length - limit} 件`);
+  }
+
+  return lines.join('\n');
 }
 
 /**

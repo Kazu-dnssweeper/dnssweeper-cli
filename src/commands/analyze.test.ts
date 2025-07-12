@@ -2,6 +2,7 @@
  * analyzeコマンドのテスト
  */
 
+import { describe, it, expect, beforeEach, afterEach, vi, type SpyInstance } from 'vitest';
 import { analyzeCommand } from './analyze';
 import { parseDNSRecordsFromCSV } from '../parsers/csvParser';
 import { loadPatternConfig } from '../patterns/patternLoader';
@@ -13,21 +14,21 @@ import { promises as fs } from 'fs';
 import path from 'path';
 
 // モック
-jest.mock('../parsers/csvParser');
-jest.mock('../patterns/patternLoader');
-jest.mock('../patterns/patternMatcher');
-jest.mock('../analyzers/riskAnalyzer');
-jest.mock('../utils/formatter');
-jest.mock('../utils/messages');
+vi.mock('../parsers/csvParser');
+vi.mock('../patterns/patternLoader');
+vi.mock('../patterns/patternMatcher');
+vi.mock('../analyzers/riskAnalyzer');
+// formatterは後でspyOnするため、ここではモックしない
+vi.mock('../utils/messages');
 
 // 型付きモック
-const mockParseDNSRecordsFromCSV = parseDNSRecordsFromCSV as jest.MockedFunction<typeof parseDNSRecordsFromCSV>;
-const mockLoadPatternConfig = loadPatternConfig as jest.MockedFunction<typeof loadPatternConfig>;
-const mockAnalyzeRecords = analyzeRecords as jest.MockedFunction<typeof analyzeRecords>;
-const mockSortByRiskScore = sortByRiskScore as jest.MockedFunction<typeof sortByRiskScore>;
-const mockFilterByRiskLevel = filterByRiskLevel as jest.MockedFunction<typeof filterByRiskLevel>;
-const mockGenerateAnalysisSummary = generateAnalysisSummary as jest.MockedFunction<typeof generateAnalysisSummary>;
-const mockGetMessages = getMessages as jest.MockedFunction<typeof getMessages>;
+const mockParseDNSRecordsFromCSV = parseDNSRecordsFromCSV as vi.MockedFunction<typeof parseDNSRecordsFromCSV>;
+const mockLoadPatternConfig = loadPatternConfig as vi.MockedFunction<typeof loadPatternConfig>;
+const mockAnalyzeRecords = analyzeRecords as vi.MockedFunction<typeof analyzeRecords>;
+const mockSortByRiskScore = sortByRiskScore as vi.MockedFunction<typeof sortByRiskScore>;
+const mockFilterByRiskLevel = filterByRiskLevel as vi.MockedFunction<typeof filterByRiskLevel>;
+const mockGenerateAnalysisSummary = generateAnalysisSummary as vi.MockedFunction<typeof generateAnalysisSummary>;
+const mockGetMessages = getMessages as vi.MockedFunction<typeof getMessages>;
 
 describe('analyzeCommand', () => {
   const testFile = path.join(__dirname, '../../../test/temp/test.csv');
@@ -147,16 +148,16 @@ describe('analyzeCommand', () => {
     });
 
     // formatterのモック設定
-    jest.spyOn(formatter, 'printAnalysisSummary').mockImplementation(() => {});
-    jest.spyOn(formatter, 'printAnalysisTable').mockImplementation(() => {});
-    jest.spyOn(formatter, 'formatAsJSON').mockReturnValue('{}');
-    jest.spyOn(formatter, 'formatAsCSV').mockReturnValue('CSV出力');
-    jest.spyOn(formatter, 'formatAsDetailedCSV').mockReturnValue('詳細CSV');
+    vi.spyOn(formatter, 'printAnalysisSummary').mockImplementation(() => {});
+    vi.spyOn(formatter, 'printAnalysisTable').mockImplementation(() => {});
+    vi.spyOn(formatter, 'formatAsJSON').mockReturnValue('{}');
+    vi.spyOn(formatter, 'formatAsCSV').mockReturnValue('CSV出力');
+    vi.spyOn(formatter, 'formatAsDetailedCSV').mockReturnValue('詳細CSV');
   });
 
   afterEach(async () => {
     // モックをリストア
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('基本機能', () => {
@@ -285,7 +286,7 @@ describe('analyzeCommand', () => {
 
       await expect(analyzeCommand([testFile, testFile2], options)).resolves.not.toThrow();
       
-      // parseDNSRecordsFromCSVが2回呼ばれたことを確認
+      // parseIDNSRecordsFromCSVが2回呼ばれたことを確認
       expect(mockParseDNSRecordsFromCSV).toHaveBeenCalledTimes(2);
     });
   });
@@ -312,7 +313,7 @@ describe('analyzeCommand', () => {
 
       await expect(analyzeCommand([testFile], options)).resolves.not.toThrow();
       
-      // loadPatternConfigがカスタムファイルパスで呼ばれたことを確認
+      // loadIPatternConfigがカスタムファイルパスで呼ばれたことを確認
       expect(mockLoadPatternConfig).toHaveBeenCalledWith(customPatternFile);
     });
   });

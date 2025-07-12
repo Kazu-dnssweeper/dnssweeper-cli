@@ -2,7 +2,7 @@
  * DNSレコードの型定義
  */
 
-export interface DNSRecord {
+export interface IDNSRecord {
   // 基本フィールド（全プロバイダー共通）
   name: string;
   type: string;
@@ -40,8 +40,8 @@ export interface DNSRecord {
   provider?: string;
 }
 
-export interface AnalysisResult {
-  record: DNSRecord;
+export interface IAnalysisResult {
+  record: IDNSRecord;
   riskScore: number;
   riskLevel: RiskLevel;
   matchedPatterns: string[];
@@ -50,7 +50,7 @@ export interface AnalysisResult {
 
 export type RiskLevel = 'critical' | 'high' | 'medium' | 'low' | 'safe';
 
-export interface PatternConfig {
+export interface IPatternConfig {
   version: string;
   description: string;
   patterns: {
@@ -85,7 +85,7 @@ export interface PatternConfig {
   };
 }
 
-export interface AnalysisSummary {
+export interface IAnalysisSummary {
   totalRecords: number;
   riskDistribution: {
     critical: number;
@@ -94,7 +94,7 @@ export interface AnalysisSummary {
     low: number;
     safe: number;
   };
-  topRiskyRecords: AnalysisResult[];
+  topRiskyRecords: IAnalysisResult[];
   processingTime: number;
   detectedProvider?: string;
 }

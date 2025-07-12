@@ -2,7 +2,7 @@
  * DNSプロバイダー関連の型定義
  */
 
-import { DNSRecord } from '../types/dns';
+import { IDNSRecord } from '../types/dns';
 
 /**
  * DNSプロバイダーインターフェース
@@ -20,11 +20,11 @@ export interface DNSProvider {
   /** CSVヘッダーからプロバイダーを検出 */
   detect(headers: string[]): boolean;
   
-  /** CSVの行をDNSRecordに変換 */
-  parse(row: any, headers: string[]): DNSRecord | null;
+  /** CSVの行をIDNSRecordに変換 */
+  parse(row: any, headers: string[]): IDNSRecord | null;
   
   /** プロバイダー固有のバリデーション */
-  validate?(record: DNSRecord): boolean;
+  validate?(record: IDNSRecord): boolean;
 }
 
 /**

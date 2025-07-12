@@ -1,20 +1,36 @@
 // Vitest用のセットアップファイル
 import { vi } from 'vitest';
 
-// グローバルモックの設定
-vi.mock('chalk', () => ({
-  default: {
-    red: (str: string) => str,
-    yellow: (str: string) => str,
-    green: (str: string) => str,
-    blue: (str: string) => str,
-    gray: (str: string) => str,
-    bold: (str: string) => str,
-    dim: (str: string) => str,
-    cyan: (str: string) => str,
-    magenta: (str: string) => str,
-  },
-}));
+// グローバルモックの設定（importOriginal使用）
+vi.mock('chalk', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    default: {
+      red: vi.fn((str: string) => str),
+      yellow: vi.fn((str: string) => str),
+      green: vi.fn((str: string) => str),
+      blue: vi.fn((str: string) => str),
+      gray: vi.fn((str: string) => str),
+      white: vi.fn((str: string) => str),
+      bold: vi.fn((str: string) => str),
+      dim: vi.fn((str: string) => str),
+      cyan: vi.fn((str: string) => str),
+      magenta: vi.fn((str: string) => str),
+    },
+    // Named exports対応
+    red: vi.fn((str: string) => str),
+    yellow: vi.fn((str: string) => str),
+    green: vi.fn((str: string) => str),
+    blue: vi.fn((str: string) => str),
+    gray: vi.fn((str: string) => str),
+    white: vi.fn((str: string) => str),
+    bold: vi.fn((str: string) => str),
+    dim: vi.fn((str: string) => str),
+    cyan: vi.fn((str: string) => str),
+    magenta: vi.fn((str: string) => str),
+  };
+});
 
 vi.mock('ora', () => ({
   default: () => ({

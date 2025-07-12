@@ -4,11 +4,11 @@
 
 import { promises as fs } from 'fs';
 import { join } from 'path';
-import { PatternConfig } from '../types/dns';
+import { IPatternConfig } from '../types/dns';
 import { 
-  PatternsConfigSchema,
   checkDuplicatePatterns,
-  type PatternsConfig 
+  type PatternsConfig,
+  PatternsConfigSchema 
 } from '../schemas/pattern.schema';
 
 /**
@@ -18,7 +18,7 @@ import {
  */
 export async function loadPatternConfig(
   patternFilePath?: string,
-): Promise<PatternConfig> {
+): Promise<IPatternConfig> {
   try {
     // デフォルトのパターンファイルパスを設定
     const defaultPatternPath = join(process.cwd(), 'patterns.json');
@@ -49,7 +49,7 @@ export async function loadPatternConfig(
       return convertToLegacyFormat(validatedConfig);
     } catch (zodError) {
       // 旧形式の場合は従来のバリデーションを使用
-      const config = rawConfig as PatternConfig;
+      const config = rawConfig as IPatternConfig;
       validatePatternConfig(config);
       return config;
     }
@@ -65,7 +65,7 @@ export async function loadPatternConfig(
  * パターン設定のバリデーション
  * @param config - 検証するパターン設定
  */
-function validatePatternConfig(config: PatternConfig): void {
+function validatePatternConfig(config: IPatternConfig): void {
   if (!config.version) {
     throw new Error('バージョン情報が必要です');
   }
@@ -120,7 +120,7 @@ function validatePatternConfig(config: PatternConfig): void {
  * デフォルトのパターン設定を生成
  * @returns デフォルトのパターン設定
  */
-export function getDefaultPatternConfig(): PatternConfig {
+export function getDefaultPatternConfig(): IPatternConfig {
   return {
     version: '1.0.0',
     description: 'デフォルトDNSレコード判定パターン',
@@ -162,7 +162,7 @@ export function getDefaultPatternConfig(): PatternConfig {
  * @param config - 新形式のパターン設定
  * @returns 旧形式のパターン設定
  */
-function convertToLegacyFormat(config: PatternsConfig): PatternConfig {
+function convertToLegacyFormat(config: PatternsConfig): IPatternConfig {
   // パターンを重要度別にグループ化
   const prefixes: { high: string[]; medium: string[]; low: string[] } = { high: [], medium: [], low: [] };
   const suffixes: { high: string[]; medium: string[]; low: string[] } = { high: [], medium: [], low: [] };

@@ -3,7 +3,7 @@
  */
 
 import { BaseProvider } from './BaseProvider';
-import { DNSRecord } from '../types/dns';
+import { IDNSRecord } from '../types/dns';
 
 export class CloudflareProvider extends BaseProvider {
   name = 'cloudflare';
@@ -26,7 +26,7 @@ export class CloudflareProvider extends BaseProvider {
   /**
    * CloudflareのCSV行をパース
    */
-  parse(row: any, headers: string[]): DNSRecord | null {
+  parse(row: any, headers: string[]): IDNSRecord | null {
     try {
       // ヘッダーとインデックスのマッピングを作成
       const headerMap = new Map<string, number>();
@@ -44,7 +44,7 @@ export class CloudflareProvider extends BaseProvider {
         return null;
       }
       
-      const record: DNSRecord = {
+      const record: IDNSRecord = {
         name: this.normalizeDomainName(name),
         type: this.normalizeRecordType(type),
         content: content.trim(),

@@ -1,3 +1,4 @@
+import { SpyInstance } from "vitest";
 /**
  * ProviderDetectorのテスト
  */
@@ -40,7 +41,7 @@ describe('ProviderDetector', () => {
     });
 
     it('Azure DNSのヘッダーを検出できる', () => {
-      const headers = ['Name', 'Type', 'TTL', 'Value'];
+      const headers = ['name', 'type', 'ttl', 'value', 'resource_group'];
       const result = detector.detectProvider(headers);
 
       expect(result).not.toBeNull();

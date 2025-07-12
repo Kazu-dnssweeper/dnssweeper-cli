@@ -4,13 +4,13 @@
 
 import { describe, it, expect } from 'vitest';
 import { 
-  DNSRecordSchema,
-  AnalysisResultSchema,
-  validateDNSRecord,
+  IDNSRecordSchema,
+  IAnalysisResultSchema,
+  validateIDNSRecord,
   parseCSVRow 
 } from '../../src/schemas/dns-record.schema';
 
-describe('DNSRecordSchema', () => {
+describe('IDNSRecordSchema', () => {
   it('有効なDNSレコードを受け入れる', () => {
     const validRecord = {
       type: 'A',
@@ -19,7 +19,7 @@ describe('DNSRecordSchema', () => {
       ttl: 3600,
     };
 
-    const result = DNSRecordSchema.safeParse(validRecord);
+    const result = IDNSRecordSchema.safeParse(validRecord);
     expect(result.success).toBe(true);
   });
 
@@ -30,7 +30,7 @@ describe('DNSRecordSchema', () => {
       content: '192.168.1.1',
     };
 
-    const result = DNSRecordSchema.safeParse(recordWithoutTTL);
+    const result = IDNSRecordSchema.safeParse(recordWithoutTTL);
     expect(result.success).toBe(true);
   });
 
@@ -41,7 +41,7 @@ describe('DNSRecordSchema', () => {
       content: '192.168.1.1',
     };
 
-    const result = DNSRecordSchema.safeParse(invalidRecord);
+    const result = IDNSRecordSchema.safeParse(invalidRecord);
     expect(result.success).toBe(false);
   });
 
@@ -53,12 +53,12 @@ describe('DNSRecordSchema', () => {
       ttl: 100000,
     };
 
-    const result = DNSRecordSchema.safeParse(invalidRecord);
+    const result = IDNSRecordSchema.safeParse(invalidRecord);
     expect(result.success).toBe(false);
   });
 });
 
-describe('validateDNSRecord', () => {
+describe('validateIDNSRecord', () => {
   it('有効なレコードでsuccess: trueを返す', () => {
     const validRecord = {
       type: 'A',
@@ -67,7 +67,7 @@ describe('validateDNSRecord', () => {
       ttl: 3600,
     };
 
-    const result = validateDNSRecord(validRecord);
+    const result = validateIDNSRecord(validRecord);
     expect(result.success).toBe(true);
   });
 
@@ -78,7 +78,7 @@ describe('validateDNSRecord', () => {
       content: '192.168.1.1',
     };
 
-    const result = validateDNSRecord(invalidRecord);
+    const result = validateIDNSRecord(invalidRecord);
     expect(result.success).toBe(false);
     expect(result.errors).toBeDefined();
     expect(result.errors!.length).toBeGreaterThan(0);

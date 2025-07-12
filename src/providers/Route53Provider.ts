@@ -3,7 +3,7 @@
  */
 
 import { BaseProvider } from './BaseProvider';
-import { DNSRecord } from '../types/dns';
+import { IDNSRecord } from '../types/dns';
 
 export class Route53Provider extends BaseProvider {
   name = 'route53';
@@ -30,7 +30,7 @@ export class Route53Provider extends BaseProvider {
   /**
    * Route 53のCSV行をパース
    */
-  parse(row: any, headers: string[]): DNSRecord | null {
+  parse(row: any, headers: string[]): IDNSRecord | null {
     try {
       // ヘッダーとインデックスのマッピングを作成
       const headerMap = new Map<string, number>();
@@ -51,7 +51,7 @@ export class Route53Provider extends BaseProvider {
       // Route 53の値は複数の場合カンマ区切りまたは配列形式の可能性がある
       const values = this.parseValues(content);
       
-      const record: DNSRecord = {
+      const record: IDNSRecord = {
         name: this.normalizeDomainName(name),
         type: this.normalizeRecordType(type),
         content: values[0], // 最初の値をメインコンテンツとする

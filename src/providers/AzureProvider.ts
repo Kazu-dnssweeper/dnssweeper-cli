@@ -3,7 +3,7 @@
  */
 
 import { BaseProvider } from './BaseProvider';
-import { DNSRecord } from '../types/dns';
+import { IDNSRecord } from '../types/dns';
 
 export class AzureProvider extends BaseProvider {
   name = 'azure';
@@ -35,7 +35,7 @@ export class AzureProvider extends BaseProvider {
   /**
    * Azure DNSのCSV行をパース
    */
-  parse(row: any, headers: string[]): DNSRecord | null {
+  parse(row: any, headers: string[]): IDNSRecord | null {
     try {
       // ヘッダーとインデックスのマッピングを作成
       const headerMap = new Map<string, number>();
@@ -59,7 +59,7 @@ export class AzureProvider extends BaseProvider {
       // Azure DNSの相対名を処理（@はルートドメイン）
       const fullName = this.resolveAzureName(name);
       
-      const record: DNSRecord = {
+      const record: IDNSRecord = {
         name: fullName,
         type: this.normalizeRecordType(type),
         content: values[0], // 最初の値をメインコンテンツとする

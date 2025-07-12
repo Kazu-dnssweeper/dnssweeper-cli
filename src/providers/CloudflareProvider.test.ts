@@ -1,9 +1,10 @@
+import { SpyInstance } from "vitest";
 /**
  * CloudflareProviderのテスト
  */
 
 import { CloudflareProvider } from './CloudflareProvider';
-import { DNSRecord } from '../types/dns';
+import { IDNSRecord } from '../types/dns';
 
 describe('CloudflareProvider', () => {
   let provider: CloudflareProvider;
@@ -98,7 +99,7 @@ describe('CloudflareProvider', () => {
 
   describe('validate', () => {
     it('正常なレコードは検証を通過する', () => {
-      const record: DNSRecord = {
+      const record: IDNSRecord = {
         name: 'example.com',
         type: 'A',
         content: '192.168.1.1',
@@ -109,7 +110,7 @@ describe('CloudflareProvider', () => {
     });
 
     it('サポートされていないレコードタイプは検証に失敗する', () => {
-      const record: DNSRecord = {
+      const record: IDNSRecord = {
         name: 'example.com',
         type: 'INVALID',
         content: '192.168.1.1',
@@ -120,7 +121,7 @@ describe('CloudflareProvider', () => {
     });
 
     it('TTLが範囲外の場合は検証に失敗する', () => {
-      const record: DNSRecord = {
+      const record: IDNSRecord = {
         name: 'example.com',
         type: 'A',
         content: '192.168.1.1',

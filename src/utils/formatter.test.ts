@@ -2,6 +2,7 @@
  * formatter.ts のユニットテスト
  */
 
+import { describe, it, expect, beforeEach, afterEach, afterAll, vi, type SpyInstance } from 'vitest';
 import {
   formatAsJSON,
   formatAsCSV,
@@ -9,14 +10,14 @@ import {
   printAnalysisSummary,
   printAnalysisTable,
 } from './formatter';
-import { AnalysisResult, AnalysisSummary, RiskLevel } from '../types/dns';
+import { IAnalysisResult, IAnalysisSummary, RiskLevel } from '../types/dns';
 
 // モックデータ作成ヘルパー
 const createMockResult = (
   name: string,
   riskScore: number,
   riskLevel: RiskLevel,
-): AnalysisResult => ({
+): IAnalysisResult => ({
   record: {
     name,
     type: 'A',
@@ -32,7 +33,7 @@ const createMockResult = (
   reasons: ['危険なプレフィックス「test-」が検出されました'],
 });
 
-const mockSummary: AnalysisSummary = {
+const mockSummary: IAnalysisSummary = {
   totalRecords: 3,
   riskDistribution: {
     critical: 1,
@@ -48,18 +49,18 @@ const mockSummary: AnalysisSummary = {
   processingTime: 1.5,
 };
 
-const mockResults: AnalysisResult[] = [
+const mockResults: IAnalysisResult[] = [
   createMockResult('critical.com', 100, 'critical'),
   createMockResult('high.com', 80, 'high'),
   createMockResult('safe.com', 10, 'safe'),
 ];
 
 describe('formatter', () => {
-  // printAnalysisSummaryとprintAnalysisTableのテストはconsole.logをモック
-  let consoleSpy: jest.SpyInstance;
+  // printIAnalysisSummaryとprintAnalysisTableのテストはconsole.logをモック
+  let consoleSpy: SpyInstance;
 
   beforeEach(() => {
-    consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -79,7 +80,7 @@ describe('formatter', () => {
     });
 
     it('空の結果でも正常に処理される', () => {
-      const emptySummary: AnalysisSummary = {
+      const emptySummary: IAnalysisSummary = {
         totalRecords: 0,
         riskDistribution: { critical: 0, high: 0, medium: 0, low: 0, safe: 0 },
         topRiskyRecords: [],
@@ -517,7 +518,7 @@ describe('formatter', () => {
     });
 
     it('高リスクレコードが0件の場合の表示', () => {
-      const noHighRiskSummary: AnalysisSummary = {
+      const noHighRiskSummary: IAnalysisSummary = {
         totalRecords: 3,
         riskDistribution: { critical: 0, high: 0, medium: 2, low: 1, safe: 0 },
         topRiskyRecords: [],
@@ -531,7 +532,7 @@ describe('formatter', () => {
     });
 
     it('空の結果でも正常に処理される', () => {
-      const emptySummary: AnalysisSummary = {
+      const emptySummary: IAnalysisSummary = {
         totalRecords: 0,
         riskDistribution: { critical: 0, high: 0, medium: 0, low: 0, safe: 0 },
         topRiskyRecords: [],
@@ -614,5 +615,5 @@ describe('formatter', () => {
 // テスト終了後のクリーンアップ
 afterAll(() => {
   // console.logモックの復元
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
 });

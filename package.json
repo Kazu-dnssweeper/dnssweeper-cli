@@ -54,7 +54,22 @@
     "setup:dev": "pnpm install && pnpm run setup:permissions",
     "prepare": "husky",
     "commit": "cz",
-    "lint-staged": "lint-staged"
+    "lint-staged": "lint-staged",
+    "dza": "ts-node src/index.ts dza",
+    "dza:test": "ts-node src/index.ts dza --risk=low --focus=testing --duration=1h",
+    "dza:docs": "ts-node src/index.ts dza --risk=low --focus=documentation --duration=2h",
+    "dza:night": "ts-node src/index.ts dza --risk=low --duration=8h",
+    "dza:continuous": "ts-node src/index.ts dza --continuous",
+    "dza:continuous-safe": "ts-node src/index.ts dza --continuous --risk=low --max-cycles=10",
+    "Z": "ts-node src/index.ts dza --continuous",
+    "z": "ts-node src/index.ts dza",
+    "dzq": "ts-node src/index.ts dzq",
+    "dzq:approve-low": "ts-node src/index.ts dzq --approve-low",
+    "benchmark": "node scripts/benchmark-streaming.js",
+    "benchmark:enhanced": "node scripts/benchmark-enhanced.js",
+    "benchmark:distributed": "node scripts/benchmark-distributed.js",
+    "test:stream": "ts-node src/index.ts analyze test-data/large/100k-records.csv --enhanced --enable-metrics",
+    "test:distributed": "ts-node src/index.ts analyze test-data/large/1m-records.csv --distributed --workers 4 --show-metrics"
   },
   "keywords": [
     "dns",
@@ -88,6 +103,7 @@
   "dependencies": {
     "chalk": "^4.1.2",
     "commander": "^11.1.0",
+    "js-yaml": "^4.1.0",
     "ora": "^5.4.1",
     "papaparse": "^5.0.0",
     "zod": "^4.0.5"
@@ -97,6 +113,7 @@
     "@commitlint/config-conventional": "^19.8.1",
     "@playwright/test": "^1.54.0",
     "@types/jest": "^29.0.0",
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "^20.0.0",
     "@types/papaparse": "^5.3.0",
     "@typescript-eslint/eslint-plugin": "^6.21.0",

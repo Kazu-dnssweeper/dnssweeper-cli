@@ -1,3 +1,4 @@
+import { SpyInstance } from "vitest";
 /**
  * Route53Providerのテスト
  */

@@ -1,0 +1,55 @@
+{
+  "project_name": "DNSweeper",
+  "directories": {
+    "default": "755",
+    "private": "700",
+    "src": "755",
+    "dist": "755",
+    "scripts": "755",
+    "logs": "700",
+    "config": "700",
+    ".dza": "700",
+    ".claude": "700",
+    "node_modules": "755"
+  },
+  "files": {
+    "default": "644",
+    "scripts": "755",
+    "configs": "600",
+    "sensitive": "400",
+    "typescript": "644",
+    "javascript": "644",
+    "json": "644",
+    "env": "400",
+    "key": "400",
+    "test": "644",
+    "executable": "755"
+  },
+  "patterns": {
+    "\\.sh$": "755",
+    "\\.py$": "755",
+    "\\.ts$": "644",
+    "\\.js$": "644",
+    "\\.mjs$": "644",
+    "\\.json$": "644",
+    "\\.yaml$": "644",
+    "\\.yml$": "644",
+    "\\.env.*": "400",
+    "\\.key$": "400",
+    "\\.pem$": "400",
+    "\\.crt$": "444",
+    "jest\\.config": "644",
+    "vitest\\.config": "644",
+    "tsconfig": "644",
+    "package\\.json": "644",
+    "package-lock\\.json": "644"
+  },
+  "dnsweeper_specific": {
+    "/patterns/": "644",
+    "/test-data/": "644",
+    "/dist/": "444",
+    "/.env": "400",
+    "/.env.local": "400",
+    "/credentials/": "400"
+  }
+}

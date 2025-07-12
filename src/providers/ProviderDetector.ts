@@ -8,6 +8,7 @@ import { Route53Provider } from './Route53Provider';
 import { GoogleCloudProvider } from './GoogleCloudProvider';
 import { AzureProvider } from './AzureProvider';
 import { OnamaeProvider } from './OnamaeProvider';
+import { NamecheapProvider } from './NamecheapProvider';
 
 export class ProviderDetector {
   private providers: DNSProvider[];
@@ -20,6 +21,7 @@ export class ProviderDetector {
       new GoogleCloudProvider(),
       new AzureProvider(),
       new OnamaeProvider(),
+      new NamecheapProvider(),
     ];
   }
   
@@ -70,40 +72,85 @@ export class ProviderDetector {
    * 検出の信頼度を計算
    */
   private calculateConfidence(provider: DNSProvider, headers: string[]): number {
-    const normalizedHeaders = headers.map(h => h.toLowerCase());
+    const normalizedHeaders = headers.map(h => h.toLowerCase().trim());
     let score = 0;
     let maxScore = 0;
     
     // プロバイダー固有のヘッダーをチェック
     const providerSpecificHeaders: { [key: string]: string[] } = {
       'cloudflare': ['proxied', 'proxy_status', 'proxiable'],
-      'route53': ['routingpolicy', 'setidentifier', 'healthcheckid'],
-      'google-cloud': ['dns_name', 'rrdatas', 'kind'],
-      'azure': ['resource_group', 'subscription_id', 'recordset'],
-      'onamae': ['ホスト名', '優先度', 'hostname'],
+      'route53': ['routingpolicy', 'setidentifier', 'healthcheckid', 'alias'],
+      'google-cloud': ['dns_name', 'rrdatas', 'kind', 'project_id'],
+      'azure': ['resource_group', 'subscription_id', 'recordset', 'tenant_id'],
+      'onamae': ['ホスト名', '優先度', 'hostname', 'タイプ'],
+      'namecheap': ['host', 'priority'],
     };
     
     const specificHeaders = providerSpecificHeaders[provider.name] || [];
     
     // 特有のヘッダーがある場合は高スコア
     for (const header of specificHeaders) {
-      maxScore += 2;
-      if (normalizedHeaders.some(h => h.includes(header.toLowerCase()))) {
-        score += 2;
+      maxScore += 3; // 重みを増やす
+      if (normalizedHeaders.some(h => h === header.toLowerCase() || h.includes(header.toLowerCase()))) {
+        score += 3;
+      }
+    }
+    
+    // ヘッダーの組み合わせパターンをチェック
+    const headerPatterns: { [key: string]: string[][] } = {
+      'cloudflare': [['name', 'type', 'content', 'proxied']],
+      'route53': [['name', 'type', 'value'], ['recordname', 'recordtype', 'value']],
+      'google-cloud': [['dns_name', 'record_type', 'ttl', 'rrdatas']],
+      'azure': [['name', 'type', 'ttl', 'value', 'resource_group']],
+      'namecheap': [['host', 'type', 'value', 'ttl', 'priority']],
+      'onamae': [['ホスト名', 'タイプ', '値'], ['hostname', 'type', 'value']],
+    };
+    
+    const patterns = headerPatterns[provider.name] || [];
+    for (const pattern of patterns) {
+      const matchCount = pattern.filter(h => 
+        normalizedHeaders.some(nh => nh === h.toLowerCase() || nh.includes(h.toLowerCase()))
+      ).length;
+      
+      if (matchCount === pattern.length) {
+        score += 5; // 完全一致ボーナス
+        maxScore += 5;
+      } else if (matchCount >= pattern.length * 0.8) {
+        score += 3; // 部分一致ボーナス
+        maxScore += 5;
+      } else {
+        maxScore += 5;
       }
     }
     
     // 基本的なヘッダーの存在をチェック
-    const basicHeaders = ['name', 'type', 'value', 'content', 'ttl'];
+    const basicHeaders = ['name', 'type', 'value', 'content', 'ttl', 'record'];
     for (const header of basicHeaders) {
       maxScore += 1;
-      if (normalizedHeaders.some(h => h.includes(header))) {
+      if (normalizedHeaders.some(h => h === header || h.includes(header))) {
         score += 1;
       }
     }
     
-    // 信頼度を0-1の範囲で返す
-    return maxScore > 0 ? score / maxScore : 0;
+    // プロバイダー特有の除外パターン
+    const exclusionPatterns: { [key: string]: string[] } = {
+      'cloudflare': ['resource_group', 'subscription_id', 'rrdatas'],
+      'route53': ['proxied', 'resource_group', 'dns_name'],
+      'google-cloud': ['proxied', 'routingpolicy', 'resource_group'],
+      'azure': ['proxied', 'rrdatas', 'routingpolicy'],
+      'namecheap': ['proxied', 'resource_group', 'rrdatas'],
+      'onamae': ['proxied', 'resource_group', 'rrdatas'],
+    };
+    
+    const exclusions = exclusionPatterns[provider.name] || [];
+    for (const exclusion of exclusions) {
+      if (normalizedHeaders.some(h => h.includes(exclusion.toLowerCase()))) {
+        score -= 2; // 他プロバイダーの特徴がある場合はペナルティ
+      }
+    }
+    
+    // 信頼度を0-1の範囲で返す（最小0）
+    return maxScore > 0 ? Math.max(0, score / maxScore) : 0;
   }
   
   /**

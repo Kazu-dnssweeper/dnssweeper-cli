@@ -3,7 +3,7 @@
  */
 
 import { BaseProvider } from './BaseProvider';
-import { DNSRecord } from '../types/dns';
+import { IDNSRecord } from '../types/dns';
 
 export class OnamaeProvider extends BaseProvider {
   name = 'onamae';
@@ -38,7 +38,7 @@ export class OnamaeProvider extends BaseProvider {
   /**
    * お名前.comのCSV行をパース
    */
-  parse(row: any, headers: string[]): DNSRecord | null {
+  parse(row: any, headers: string[]): IDNSRecord | null {
     try {
       // ヘッダーとインデックスのマッピングを作成（日本語対応）
       const headerMap = new Map<string, number>();
@@ -62,7 +62,7 @@ export class OnamaeProvider extends BaseProvider {
       // お名前.comの相対名を処理（@はルートドメイン）
       const fullName = this.resolveOnamaeName(name);
       
-      const record: DNSRecord = {
+      const record: IDNSRecord = {
         name: fullName,
         type: this.normalizeRecordType(type),
         content: content.trim(),

@@ -6,7 +6,7 @@
 import { z } from 'zod';
 
 // DNSレコードタイプの定義
-export const DNSRecordTypeSchema = z.enum([
+export const IDNSRecordTypeSchema = z.enum([
   'A',
   'AAAA',
   'CNAME',
@@ -25,9 +25,9 @@ export const DNSRecordTypeSchema = z.enum([
 ]);
 
 // DNSレコードの基本スキーマ
-export const DNSRecordSchema = z.object({
+export const IDNSRecordSchema = z.object({
   // 必須フィールド
-  type: DNSRecordTypeSchema,
+  type: IDNSRecordTypeSchema,
   name: z.string().min(1, 'レコード名は必須です'),
   content: z.string().min(1, 'コンテンツは必須です'),
   
@@ -58,15 +58,15 @@ export const DNSRecordSchema = z.object({
   provider: z.string().optional(),
   zone_id: z.string().optional(),
   zone_name: z.string().optional(),
-  data: z.record(z.unknown()).optional(), // プロバイダー固有のデータ
+  data: z.record(z.string(), z.unknown()).optional(), // プロバイダー固有のデータ
 });
 
 // リスクカテゴリーの定義
 export const RiskCategorySchema = z.enum(['critical', 'high', 'medium', 'low', 'safe']);
 
 // 分析結果のスキーマ
-export const AnalysisResultSchema = z.object({
-  record: DNSRecordSchema,
+export const IAnalysisResultSchema = z.object({
+  record: IDNSRecordSchema,
   riskScore: z.number()
     .min(0)
     .max(100),
@@ -115,7 +115,7 @@ export const GoogleCloudCSVRowSchema = z.object({
 });
 
 // 汎用CSVスキーマ（自動検出用）
-export const GenericCSVRowSchema = z.record(z.unknown());
+export const GenericCSVRowSchema = z.record(z.string(), z.unknown());
 
 // バリデーション結果の型
 export const ValidationResultSchema = z.object({
@@ -129,10 +129,10 @@ export const ValidationResultSchema = z.object({
 });
 
 // 型エクスポート
-export type DNSRecord = z.infer<typeof DNSRecordSchema>;
-export type DNSRecordType = z.infer<typeof DNSRecordTypeSchema>;
+export type IDNSRecord = z.infer<typeof IDNSRecordSchema>;
+export type IDNSRecordType = z.infer<typeof IDNSRecordTypeSchema>;
 export type RiskCategory = z.infer<typeof RiskCategorySchema>;
-export type AnalysisResult = z.infer<typeof AnalysisResultSchema>;
+export type IAnalysisResult = z.infer<typeof IAnalysisResultSchema>;
 export type CloudflareCSVRow = z.infer<typeof CloudflareCSVRowSchema>;
 export type Route53CSVRow = z.infer<typeof Route53CSVRowSchema>;
 export type GoogleCloudCSVRow = z.infer<typeof GoogleCloudCSVRowSchema>;
@@ -140,7 +140,7 @@ export type GenericCSVRow = z.infer<typeof GenericCSVRowSchema>;
 export type ValidationResult = z.infer<typeof ValidationResultSchema>;
 
 // ヘルパー関数
-export function parseCSVRow(row: unknown, provider?: string): DNSRecord | null {
+export function parseCSVRow(row: unknown, provider?: string): IDNSRecord | null {
   try {
     let validatedRow: any;
     
@@ -148,7 +148,7 @@ export function parseCSVRow(row: unknown, provider?: string): DNSRecord | null {
     switch (provider?.toLowerCase()) {
       case 'cloudflare':
         validatedRow = CloudflareCSVRowSchema.parse(row);
-        return DNSRecordSchema.parse({
+        return IDNSRecordSchema.parse({
           type: validatedRow.Type,
           name: validatedRow.Name,
           content: validatedRow.Content,
@@ -165,7 +165,7 @@ export function parseCSVRow(row: unknown, provider?: string): DNSRecord | null {
       case 'route53':
       case 'aws':
         validatedRow = Route53CSVRowSchema.parse(row);
-        return DNSRecordSchema.parse({
+        return IDNSRecordSchema.parse({
           type: validatedRow.Type,
           name: validatedRow.Name,
           content: validatedRow.Value,
@@ -182,7 +182,7 @@ export function parseCSVRow(row: unknown, provider?: string): DNSRecord | null {
       case 'googlecloud':
       case 'gcp':
         validatedRow = GoogleCloudCSVRowSchema.parse(row);
-        return DNSRecordSchema.parse({
+        return IDNSRecordSchema.parse({
           type: validatedRow.type.toUpperCase(),
           name: validatedRow.name,
           content: validatedRow.rrdatas,
@@ -204,9 +204,9 @@ export function parseCSVRow(row: unknown, provider?: string): DNSRecord | null {
 }
 
 // バリデーションヘルパー
-export function validateDNSRecord(record: unknown): ValidationResult {
+export function validateIDNSRecord(record: unknown): ValidationResult {
   try {
-    const data = DNSRecordSchema.parse(record);
+    const data = IDNSRecordSchema.parse(record);
     return { success: true, data };
   } catch (error) {
     if (error instanceof z.ZodError) {

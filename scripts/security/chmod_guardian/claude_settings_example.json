@@ -1,0 +1,38 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "^(bash|shell|run_command|execute_command|cmd)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 /path/to/dnssweeper/scripts/security/chmod_guardian/hooks/chmod_guardian.py"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "^(bash|shell|run_command|execute_command|cmd)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 /path/to/dnssweeper/scripts/security/chmod_guardian/hooks/permission_tracker.py",
+            "run_in_background": true
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 /path/to/dnssweeper/scripts/security/chmod_guardian/hooks/security_monitor.py",
+            "run_in_background": true
+          }
+        ]
+      }
+    ]
+  }
+}

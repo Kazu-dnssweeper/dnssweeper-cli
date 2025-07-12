@@ -20,7 +20,7 @@ export function setLanguage(language: Language): void {
   currentLanguage = language;
 }
 
-export interface Messages {
+export interface IMessages {
   // アプリケーション基本メッセージ
   app: {
     title: string;
@@ -94,7 +94,7 @@ export interface Messages {
   };
 }
 
-const japaneseMessages: Messages = {
+const japaneseMessages: IMessages = {
   app: {
     title: '🔍 DNSweeper CLI - DNS レコード分析ツール',
     analyzing: 'CSVファイルを分析中...',
@@ -137,7 +137,7 @@ const japaneseMessages: Messages = {
   },
 };
 
-const englishMessages: Messages = {
+const englishMessages: IMessages = {
   app: {
     title: '🔍 DNSweeper CLI - DNS Record Analysis Tool',
     analyzing: 'Analyzing CSV file...',
@@ -180,7 +180,7 @@ const englishMessages: Messages = {
   },
 };
 
-const messageStore = new Map<Language, Messages>([
+const messageStore = new Map<Language, IMessages>([
   ['ja', japaneseMessages],
   ['en', englishMessages],
 ]);
@@ -188,8 +188,8 @@ const messageStore = new Map<Language, Messages>([
 /**
  * 指定された言語のメッセージを取得
  */
-export function getMessages(language: Language): Messages {
-  return messageStore.get(language) || japaneseMessages;
+export function getMessages(language: Language): IMessages {
+  return messageStore.get(language) ?? japaneseMessages;
 }
 
 /**

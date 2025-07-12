@@ -1,9 +1,10 @@
+import { SpyInstance } from "vitest";
 /**
  * csvParser.ts のユニットテスト
  */
 
 import { parseDNSRecordsFromCSV, validateDNSRecord } from './csvParser';
-import { DNSRecord } from '../types/dns';
+import { IDNSRecord } from '../types/dns';
 import { promises as fs } from 'fs';
 import path from 'path';
 
@@ -93,7 +94,7 @@ describe('csvParser', () => {
   });
 
   describe('validateDNSRecord', () => {
-    const validRecord: DNSRecord = {
+    const validRecord: IDNSRecord = {
       name: 'example.com',
       type: 'A',
       content: '192.168.1.1',
@@ -115,7 +116,7 @@ describe('csvParser', () => {
       const result = validateDNSRecord(invalidRecord);
 
       expect(result.isValid).toBe(false);
-      expect(result.errors).toContain('Name フィールドが必須です');
+      expect(result.errors).toContain('name: レコード名は必須です');
     });
 
     it('タイプがないレコードでエラーを返す', () => {
@@ -157,5 +158,5 @@ describe('csvParser', () => {
 // テスト終了後のクリーンアップ
 afterAll(() => {
   // ファイルシステム関連のモックをクリア
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
 });

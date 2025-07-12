@@ -5,10 +5,10 @@
 
 import Papa from 'papaparse';
 import { createReadStream } from 'fs';
-import { pipeline, Transform } from 'stream';
+import { Transform, pipeline } from 'stream';
 import { promisify } from 'util';
-import { IAnalysisResult, IDNSRecord } from '../types/dns';
-import { IPatternConfig } from '../types/dns';
+import { DNSRecord, AnalysisResult } from '../types/dns';
+import { PatternConfig } from '../types/dns';
 
 const pipelineAsync = promisify(pipeline);
 
@@ -24,16 +24,16 @@ export interface StreamOptions {
 /**
  * DNSレコード処理用のTransformストリーム
  */
-class IDNSRecordProcessor extends Transform {
-  private buffer: IDNSRecord[] = [];
+class DNSRecordProcessor extends Transform {
+  private buffer: DNSRecord[] = [];
   private processedCount = 0;
   private readonly chunkSize: number;
   private readonly onProgress: ((processed: number, percentage?: number) => void) | undefined;
-  private readonly processChunk: (records: IDNSRecord[]) => Promise<IAnalysisResult[]>;
+  private readonly processChunk: (records: DNSRecord[]) => Promise<AnalysisResult[]>;
 
   constructor(
-    _patternConfig: IPatternConfig,
-    processChunk: (records: IDNSRecord[]) => Promise<IAnalysisResult[]>,
+    _patternConfig: PatternConfig,
+    processChunk: (records: DNSRecord[]) => Promise<AnalysisResult[]>,
     options: StreamOptions = {},
   ) {
     super({ objectMode: true });
@@ -49,7 +49,7 @@ class IDNSRecordProcessor extends Transform {
   ): Promise<void> {
     try {
       // レコードの変換
-      const dnsRecord: IDNSRecord = {
+      const dnsRecord: DNSRecord = {
         name: record.Name || '',
         type: record.Type || '',
         content: record.Content || '',
@@ -128,11 +128,11 @@ export function getMemoryUsage(): { used: number; limit: number } {
  */
 export async function streamProcessCSV(
   filePath: string,
-  patternConfig: IPatternConfig,
-  processChunk: (records: IDNSRecord[]) => Promise<IAnalysisResult[]>,
+  patternConfig: PatternConfig,
+  processChunk: (records: DNSRecord[]) => Promise<AnalysisResult[]>,
   options: StreamOptions = {},
-): Promise<IAnalysisResult[]> {
-  const results: IAnalysisResult[] = [];
+): Promise<AnalysisResult[]> {
+  const results: AnalysisResult[] = [];
   const memoryLimit = options.memoryLimit || 100; // MB
 
   // メモリ監視
@@ -148,7 +148,7 @@ export async function streamProcessCSV(
 
   try {
     const readStream = createReadStream(filePath);
-    const processor = new IDNSRecordProcessor(patternConfig, processChunk, options);
+    const processor = new DNSRecordProcessor(patternConfig, processChunk, options);
 
     // Papa Parse のストリーミングパーサー
     const parseStream = Papa.parse(Papa.NODE_STREAM_INPUT, {
@@ -161,7 +161,7 @@ export async function streamProcessCSV(
     // 結果収集用のTransformストリーム
     const resultCollector = new Transform({
       objectMode: true,
-      transform(result: IAnalysisResult, _encoding: any, callback: any) {
+      transform(result: AnalysisResult, _encoding: any, callback: any) {
         results.push(result);
         callback();
       },
@@ -189,7 +189,7 @@ export async function streamProcessCSV(
  */
 export async function streamProcessRecords(
   filePath: string,
-  processRecord: (record: IDNSRecord) => Promise<void>,
+  processRecord: (record: DNSRecord) => Promise<void>,
   options: StreamOptions = {},
 ): Promise<void> {
   let processedCount = 0;
@@ -210,7 +210,7 @@ export async function streamProcessRecords(
         }
 
         const data = row.data as Record<string, any>;
-        const record: IDNSRecord = {
+        const record: DNSRecord = {
           name: data.Name || '',
           type: data.Type || '',
           content: data.Content || '',

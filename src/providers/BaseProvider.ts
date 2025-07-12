@@ -3,7 +3,7 @@
  */
 
 import { DNSProvider } from './types';
-import { IDNSRecord } from '../types/dns';
+import { DNSRecord } from '../types/dns';
 
 export abstract class BaseProvider implements DNSProvider {
   abstract name: string;
@@ -66,12 +66,12 @@ export abstract class BaseProvider implements DNSProvider {
   }
   
   abstract detect(headers: string[]): boolean;
-  abstract parse(row: any, headers: string[]): IDNSRecord | null;
+  abstract parse(row: any, headers: string[]): DNSRecord | null;
   
   /**
    * 基本的なバリデーション
    */
-  validate(record: IDNSRecord): boolean {
+  validate(record: DNSRecord): boolean {
     // レコード名の検証
     if (!record.name || record.name.trim() === '') {
       return false;

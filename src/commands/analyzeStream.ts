@@ -6,26 +6,26 @@
 import chalk from 'chalk';
 import ora from 'ora';
 import { 
-  estimateRecordCount, 
+  streamProcessCSV, 
+  streamProcessRecords,
   getFileSize,
+  estimateRecordCount,
   getMemoryUsage,
-  StreamOptions,
-  streamProcessCSV,
-  streamProcessRecords, 
+  StreamOptions, 
 } from '../parsers/csvStreamParser';
 import { loadPatternConfig } from '../patterns/patternLoader';
 import { analyzeRecords, sortByRiskScore } from '../patterns/patternMatcher';
 import { generateAnalysisSummary } from '../analyzers/riskAnalyzer';
 import {
-  formatAsCSV,
-  formatAsDetailedCSV,
-  formatAsJSON,
   printAnalysisSummary,
   printAnalysisTable,
+  formatAsJSON,
+  formatAsCSV,
+  formatAsDetailedCSV,
 } from '../utils/formatter';
 import { getMessages } from '../utils/messages';
 import { filterByRiskLevel } from '../patterns/patternMatcher';
-import type { IAnalysisResult, IDNSRecord } from '../types/dns';
+import type { DNSRecord, AnalysisResult } from '../types/dns';
 import { promises as fs } from 'fs';
 
 interface AnalyzeStreamOptions {
@@ -44,9 +44,9 @@ interface AnalyzeStreamOptions {
  * ファイルサイズをフォーマット
  */
 function formatFileSize(bytes: number): string {
-  if (bytes < 1024) {return `${bytes} B`;}
-  if (bytes < 1024 * 1024) {return `${(bytes / 1024).toFixed(1)} KB`;}
-  if (bytes < 1024 * 1024 * 1024) {return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;}
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
 }
 
@@ -108,7 +108,7 @@ export async function analyzeStreamCommand(
     const patternConfig = await loadPatternConfig(options.patterns);
 
     // 全体の分析結果を保持
-    let allResults: IAnalysisResult[] = [];
+    let allResults: AnalysisResult[] = [];
     let totalProcessed = 0;
 
     // ストリーミングオプション
@@ -135,7 +135,7 @@ export async function analyzeStreamCommand(
       console.log(chalk.gray(`推定レコード数: ${estimatedCount.toLocaleString()}`));
 
       // チャンク処理関数
-      const processChunk = async (records: IDNSRecord[]): Promise<IAnalysisResult[]> => {
+      const processChunk = async (records: DNSRecord[]): Promise<AnalysisResult[]> => {
         const results = analyzeRecords(records, patternConfig);
         totalProcessed += records.length;
         return results;
@@ -260,7 +260,7 @@ export async function analyzeStreamCommand(
  */
 export async function processLargeFiles(
   files: string[],
-  processRecord: (record: IDNSRecord) => Promise<void>,
+  processRecord: (record: DNSRecord) => Promise<void>,
   options: StreamOptions = {},
 ): Promise<void> {
   for (const file of files) {

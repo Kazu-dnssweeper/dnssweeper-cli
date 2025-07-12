@@ -3,33 +3,12 @@
  */
 
 import {
-  IAnalysisResult,
-  IDNSRecord,
-  IPatternConfig,
+  DNSRecord,
+  PatternConfig,
+  AnalysisResult,
   RiskLevel,
 } from '../types/dns';
-import { formatMessage, getMessages, Language } from '../utils/messages';
-
-/**
- * パターンマッチャークラス
- */
-export class PatternMatcher {
-  constructor(private config: IPatternConfig, private language: Language = 'ja') {}
-
-  /**
-   * DNSレコードを分析
-   */
-  analyze(record: IDNSRecord): IAnalysisResult {
-    return analyzeRecord(record, this.config, this.language);
-  }
-
-  /**
-   * 複数のDNSレコードを分析
-   */
-  analyzeMultiple(records: IDNSRecord[]): IAnalysisResult[] {
-    return records.map(record => this.analyze(record));
-  }
-}
+import { getMessages, formatMessage, Language } from '../utils/messages';
 
 /**
  * DNSレコードをパターンマッチングして分析する
@@ -39,10 +18,10 @@ export class PatternMatcher {
  * @returns 分析結果
  */
 export function analyzeRecord(
-  record: IDNSRecord,
-  config: IPatternConfig,
+  record: DNSRecord,
+  config: PatternConfig,
   language: Language = 'ja',
-): IAnalysisResult {
+): AnalysisResult {
   const matchedPatterns: string[] = [];
   const reasons: string[] = [];
   let riskScore = config.scoring.base;
@@ -156,12 +135,12 @@ export function analyzeRecord(
  */
 function determineRiskLevel(
   score: number,
-  thresholds: IPatternConfig['thresholds'],
+  thresholds: PatternConfig['thresholds'],
 ): RiskLevel {
-  if (score >= thresholds.critical) {return 'critical';}
-  if (score >= thresholds.high) {return 'high';}
-  if (score >= thresholds.medium) {return 'medium';}
-  if (score >= thresholds.low) {return 'low';}
+  if (score >= thresholds.critical) return 'critical';
+  if (score >= thresholds.high) return 'high';
+  if (score >= thresholds.medium) return 'medium';
+  if (score >= thresholds.low) return 'low';
   return 'safe';
 }
 
@@ -173,10 +152,10 @@ function determineRiskLevel(
  * @returns 分析結果の配列
  */
 export function analyzeRecords(
-  records: IDNSRecord[],
-  config: IPatternConfig,
+  records: DNSRecord[],
+  config: PatternConfig,
   language: Language = 'ja',
-): IAnalysisResult[] {
+): AnalysisResult[] {
   return records.map(record => analyzeRecord(record, config, language));
 }
 
@@ -187,9 +166,9 @@ export function analyzeRecords(
  * @returns フィルタリングされた分析結果
  */
 export function filterByRiskLevel(
-  results: IAnalysisResult[],
+  results: AnalysisResult[],
   minRiskLevel: RiskLevel,
-): IAnalysisResult[] {
+): AnalysisResult[] {
   const riskLevelOrder: RiskLevel[] = [
     'safe',
     'low',
@@ -212,9 +191,9 @@ export function filterByRiskLevel(
  * @returns ソートされた分析結果
  */
 export function sortByRiskScore(
-  results: IAnalysisResult[],
+  results: AnalysisResult[],
   descending = true,
-): IAnalysisResult[] {
+): AnalysisResult[] {
   return [...results].sort((a, b) => {
     return descending ? b.riskScore - a.riskScore : a.riskScore - b.riskScore;
   });
@@ -228,9 +207,9 @@ export function sortByRiskScore(
  * @returns 分析結果
  */
 export function analyzeSingleRecord(
-  record: IDNSRecord,
-  config: IPatternConfig,
+  record: DNSRecord,
+  config: PatternConfig,
   language: Language = 'ja',
-): IAnalysisResult {
+): AnalysisResult {
   return analyzeRecord(record, config, language);
 }

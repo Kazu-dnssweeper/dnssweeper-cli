@@ -10,10 +10,11 @@
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking",
     "prettier"
   ],
   "rules": {
-    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-explicit-any": "warn",
     "@typescript-eslint/explicit-function-return-type": [
       "warn",
       {
@@ -47,14 +48,21 @@
         "format": ["PascalCase"]
       }
     ],
-    "@typescript-eslint/no-floating-promises": "off",
-    "@typescript-eslint/no-misused-promises": "off",
-    "@typescript-eslint/await-thenable": "off",
-    "@typescript-eslint/no-unnecessary-type-assertion": "off",
+    "@typescript-eslint/no-floating-promises": "error",
+    "@typescript-eslint/no-misused-promises": "error",
+    "@typescript-eslint/await-thenable": "error",
+    "@typescript-eslint/no-unnecessary-type-assertion": "error",
     "@typescript-eslint/prefer-nullish-coalescing": "warn",
     "@typescript-eslint/prefer-optional-chain": "warn",
-    "@typescript-eslint/strict-boolean-expressions": "off",
-    "no-console": "off",
+    "@typescript-eslint/strict-boolean-expressions": [
+      "warn",
+      {
+        "allowString": true,
+        "allowNumber": true,
+        "allowNullableObject": true
+      }
+    ],
+    "no-console": ["warn", { "allow": ["warn", "error", "info"] }],
     "no-debugger": "error",
     "no-eval": "error",
     "no-implied-eval": "error",
@@ -84,15 +92,5 @@
     "es2022": true,
     "jest": true
   },
-  "ignorePatterns": [
-    "dist/",
-    "node_modules/",
-    "coverage/",
-    "*.js",
-    "scripts/",
-    "test-data/",
-    "**/*.test.ts",
-    "**/*.spec.ts",
-    "test/**/*"
-  ]
+  "ignorePatterns": ["dist/", "node_modules/", "coverage/", "*.js", "scripts/", "test-data/"]
 }

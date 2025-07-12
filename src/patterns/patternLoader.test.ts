@@ -1,10 +1,9 @@
-import { SpyInstance } from "vitest";
 /**
  * patternLoader.ts のユニットテスト
  */
 
 import { loadPatternConfig, getDefaultPatternConfig } from './patternLoader';
-import { IPatternConfig } from '../types/dns';
+import { PatternConfig } from '../types/dns';
 import { promises as fs } from 'fs';
 import path from 'path';
 
@@ -27,7 +26,7 @@ describe('patternLoader', () => {
   });
 
   describe('loadPatternConfig', () => {
-    const validConfig: IPatternConfig = {
+    const validConfig: PatternConfig = {
       version: '1.0.0',
       description: 'テスト用パターン設定',
       patterns: {
@@ -91,7 +90,7 @@ describe('patternLoader', () => {
     });
 
     it('バージョン情報がない設定でエラーが発生する', async () => {
-      const invalidConfig = { ...validConfig } as Partial<IPatternConfig>;
+      const invalidConfig = { ...validConfig } as Partial<PatternConfig>;
       delete invalidConfig.version;
       await fs.writeFile(tempPatternFile, JSON.stringify(invalidConfig));
 
@@ -101,7 +100,7 @@ describe('patternLoader', () => {
     });
 
     it('パターン定義がない設定でエラーが発生する', async () => {
-      const invalidConfig = { ...validConfig } as Partial<IPatternConfig>;
+      const invalidConfig = { ...validConfig } as Partial<PatternConfig>;
       delete invalidConfig.patterns;
       await fs.writeFile(tempPatternFile, JSON.stringify(invalidConfig));
 
@@ -126,7 +125,7 @@ describe('patternLoader', () => {
     });
 
     it('スコアリング設定がない設定でエラーが発生する', async () => {
-      const invalidConfig = { ...validConfig } as Partial<IPatternConfig>;
+      const invalidConfig = { ...validConfig } as Partial<PatternConfig>;
       delete invalidConfig.scoring;
       await fs.writeFile(tempPatternFile, JSON.stringify(invalidConfig));
 
@@ -136,7 +135,7 @@ describe('patternLoader', () => {
     });
 
     it('閾値設定がない設定でエラーが発生する', async () => {
-      const invalidConfig = { ...validConfig } as Partial<IPatternConfig>;
+      const invalidConfig = { ...validConfig } as Partial<PatternConfig>;
       delete invalidConfig.thresholds;
       await fs.writeFile(tempPatternFile, JSON.stringify(invalidConfig));
 
@@ -241,5 +240,5 @@ describe('patternLoader', () => {
 // テスト終了後のクリーンアップ
 afterAll(async () => {
   // ファイルシステム関連のモックをクリア
-  vi.restoreAllMocks();
+  jest.restoreAllMocks();
 });

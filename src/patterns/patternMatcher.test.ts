@@ -1,4 +1,3 @@
-import { SpyInstance } from "vitest";
 /**
  * patternMatcher.ts のユニットテスト
  */
@@ -9,10 +8,10 @@ import {
   filterByRiskLevel,
   sortByRiskScore,
 } from './patternMatcher';
-import { IDNSRecord, IPatternConfig, RiskLevel } from '../types/dns';
+import { DNSRecord, PatternConfig, RiskLevel } from '../types/dns';
 
 // モックパターン設定
-const mockIPatternConfig: IPatternConfig = {
+const mockPatternConfig: PatternConfig = {
   version: '1.0.0',
   description: 'テスト用パターン',
   patterns: {
@@ -48,7 +47,7 @@ const mockIPatternConfig: IPatternConfig = {
 };
 
 // モックDNSレコード（最近の日付を使用して日付ペナルティを回避）
-const mockIDNSRecord: IDNSRecord = {
+const mockDNSRecord: DNSRecord = {
   name: 'example.com',
   type: 'A',
   content: '192.168.1.1',
@@ -61,7 +60,7 @@ const mockIDNSRecord: IDNSRecord = {
 describe('patternMatcher', () => {
   describe('analyzeRecord', () => {
     it('パターンにマッチしないレコードのリスクスコアは基本スコアのみ', () => {
-      const result = analyzeRecord(mockIDNSRecord, mockIPatternConfig);
+      const result = analyzeRecord(mockDNSRecord, mockPatternConfig);
 
       expect(result.riskScore).toBe(10); // base score only (最近の日付なので追加スコアなし)
       expect(result.riskLevel).toBe('safe');
@@ -69,8 +68,8 @@ describe('patternMatcher', () => {
     });
 
     it('高リスクプレフィックスを検出する', () => {
-      const record = { ...mockIDNSRecord, name: 'old-api.example.com' };
-      const result = analyzeRecord(record, mockIPatternConfig);
+      const record = { ...mockDNSRecord, name: 'old-api.example.com' };
+      const result = analyzeRecord(record, mockPatternConfig);
 
       expect(result.riskScore).toBe(90); // base(10) + high(80)
       expect(result.riskLevel).toBe('critical');
@@ -81,8 +80,8 @@ describe('patternMatcher', () => {
     });
 
     it('中リスクサフィックスを検出する', () => {
-      const record = { ...mockIDNSRecord, name: 'api-backup.example.com' };
-      const result = analyzeRecord(record, mockIPatternConfig);
+      const record = { ...mockDNSRecord, name: 'api-backup.example.com' };
+      const result = analyzeRecord(record, mockPatternConfig);
 
       expect(result.riskScore).toBe(60); // base(10) + medium(50)
       expect(result.riskLevel).toBe('medium');
@@ -90,8 +89,8 @@ describe('patternMatcher', () => {
     });
 
     it('低リスクキーワードを検出する', () => {
-      const record = { ...mockIDNSRecord, name: 'upcoming-feature.example.com' };
-      const result = analyzeRecord(record, mockIPatternConfig);
+      const record = { ...mockDNSRecord, name: 'upcoming-feature.example.com' };
+      const result = analyzeRecord(record, mockPatternConfig);
 
       expect(result.riskScore).toBe(40); // base(10) + low(30)
       expect(result.riskLevel).toBe('low');
@@ -100,10 +99,10 @@ describe('patternMatcher', () => {
 
     it('複数のパターンマッチでスコアが累積する', () => {
       const record = {
-        ...mockIDNSRecord,
+        ...mockDNSRecord,
         name: 'old-system-backup.example.com',
       };
-      const result = analyzeRecord(record, mockIPatternConfig);
+      const result = analyzeRecord(record, mockPatternConfig);
 
       // base(10) + high prefix(80) + medium suffix(50) = 140
       expect(result.riskScore).toBe(140);
@@ -114,16 +113,16 @@ describe('patternMatcher', () => {
     it('1年以上更新されていないレコードに追加スコアを付与', () => {
       const oldDate = new Date();
       oldDate.setFullYear(oldDate.getFullYear() - 2);
-      const record = { ...mockIDNSRecord, modified: oldDate.toISOString() };
-      const result = analyzeRecord(record, mockIPatternConfig);
+      const record = { ...mockDNSRecord, modified: oldDate.toISOString() };
+      const result = analyzeRecord(record, mockPatternConfig);
 
       expect(result.riskScore).toBeGreaterThan(10); // base + age penalty
       expect(result.reasons.some(r => r.includes('最終更新から'))).toBe(true);
     });
 
     it('CNAMEレコードに追加スコアを付与', () => {
-      const record = { ...mockIDNSRecord, type: 'CNAME' };
-      const result = analyzeRecord(record, mockIPatternConfig);
+      const record = { ...mockDNSRecord, type: 'CNAME' };
+      const result = analyzeRecord(record, mockPatternConfig);
 
       expect(result.riskScore).toBe(15); // base(10) + CNAME(5)
       expect(result.reasons).toContain(
@@ -132,8 +131,8 @@ describe('patternMatcher', () => {
     });
 
     it('大文字小文字を区別せずにマッチング', () => {
-      const record = { ...mockIDNSRecord, name: 'OLD-API.EXAMPLE.COM' };
-      const result = analyzeRecord(record, mockIPatternConfig);
+      const record = { ...mockDNSRecord, name: 'OLD-API.EXAMPLE.COM' };
+      const result = analyzeRecord(record, mockPatternConfig);
 
       expect(result.matchedPatterns).toContain('prefix:old-');
     });
@@ -142,12 +141,12 @@ describe('patternMatcher', () => {
   describe('analyzeRecords', () => {
     it('複数のレコードを一度に分析できる', () => {
       const records = [
-        mockIDNSRecord,
-        { ...mockIDNSRecord, name: 'old-api.example.com' },
-        { ...mockIDNSRecord, name: 'backup-db.example.com' },
+        mockDNSRecord,
+        { ...mockDNSRecord, name: 'old-api.example.com' },
+        { ...mockDNSRecord, name: 'backup-db.example.com' },
       ];
 
-      const results = analyzeRecords(records, mockIPatternConfig);
+      const results = analyzeRecords(records, mockPatternConfig);
 
       expect(results).toHaveLength(3);
       expect(results[0].riskScore).toBe(10); // safe
@@ -165,7 +164,7 @@ describe('patternMatcher', () => {
       { riskLevel: 'critical' as RiskLevel, riskScore: 100 },
     ].map(r => ({
       ...r,
-      record: mockIDNSRecord,
+      record: mockDNSRecord,
       matchedPatterns: [],
       reasons: [],
     }));
@@ -203,7 +202,7 @@ describe('patternMatcher', () => {
       { riskScore: 80 },
     ].map(r => ({
       ...r,
-      record: mockIDNSRecord,
+      record: mockDNSRecord,
       riskLevel: 'medium' as RiskLevel,
       matchedPatterns: [],
       reasons: [],
@@ -240,5 +239,5 @@ describe('patternMatcher', () => {
 // テスト終了後のクリーンアップ
 afterAll(() => {
   // モックをクリア
-  vi.clearAllMocks();
+  jest.clearAllMocks();
 });

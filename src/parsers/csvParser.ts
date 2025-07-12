@@ -4,12 +4,12 @@
 
 import Papa from 'papaparse';
 import { promises as fs } from 'fs';
-import { IDNSRecord } from '../types/dns';
+import { DNSRecord } from '../types/dns';
 import { ProviderDetector } from '../providers/ProviderDetector';
 import { DNSProvider } from '../providers/types';
 import { 
   parseCSVRow,
-  validateIDNSRecord as validateWithZod 
+  validateDNSRecord as validateWithZod 
 } from '../schemas/dns-record.schema';
 import { z } from 'zod';
 
@@ -22,7 +22,7 @@ import { z } from 'zod';
 export async function parseDNSRecordsFromCSV(
   filePath: string,
   providerName?: string,
-): Promise<IDNSRecord[]> {
+): Promise<DNSRecord[]> {
   try {
     // ファイルの存在確認
     await fs.access(filePath);
@@ -76,8 +76,8 @@ export async function parseDNSRecordsFromCSV(
       throw new Error('プロバイダーを特定できませんでした');
     }
 
-    // IDNSRecordに変換
-    const records: IDNSRecord[] = [];
+    // DNSRecordに変換
+    const records: DNSRecord[] = [];
     
     rows.forEach((row: Record<string, any>, index: number) => {
       try {
@@ -129,7 +129,7 @@ export async function parseDNSRecordsFromCSV(
  * @param record - 検証するDNSレコード
  * @returns バリデーション結果
  */
-export function validateDNSRecord(record: IDNSRecord): {
+export function validateDNSRecord(record: DNSRecord): {
   isValid: boolean;
   errors: string[];
 } {
@@ -146,10 +146,6 @@ export function validateDNSRecord(record: IDNSRecord): {
   // Zodのエラーをユーザーフレンドリーな形式に変換
   const errors = validation.errors?.map(error => {
     if (error.field === 'type') {
-      // typeが空文字列の場合は必須エラー
-      if (!record.type || record.type === '') {
-        return 'Type フィールドが必須です';
-      }
       return `サポートされていないDNSレコードタイプ: ${record.type}`;
     }
     if (error.field === 'ttl') {

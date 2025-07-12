@@ -2,7 +2,7 @@
  * リスク分析機能
  */
 
-import { IAnalysisResult, IAnalysisSummary, RiskLevel } from '../types/dns';
+import { AnalysisResult, AnalysisSummary, RiskLevel } from '../types/dns';
 
 /**
  * 分析結果のサマリーを生成
@@ -11,9 +11,9 @@ import { IAnalysisResult, IAnalysisSummary, RiskLevel } from '../types/dns';
  * @returns 分析サマリー
  */
 export function generateAnalysisSummary(
-  results: IAnalysisResult[],
+  results: AnalysisResult[],
   processingTime: number,
-): IAnalysisSummary {
+): AnalysisSummary {
   const riskDistribution = {
     critical: 0,
     high: 0,
@@ -74,9 +74,9 @@ export function getRiskLevelColor(riskLevel: RiskLevel): {
  * @returns 削除推奨レコード
  */
 export function getRecommendedForDeletion(
-  results: IAnalysisResult[],
+  results: AnalysisResult[],
   minRiskLevel: RiskLevel = 'high',
-): IAnalysisResult[] {
+): AnalysisResult[] {
   const riskLevelOrder: RiskLevel[] = [
     'safe',
     'low',
@@ -97,7 +97,7 @@ export function getRecommendedForDeletion(
  * @param results - 分析結果の配列
  * @returns 統計情報
  */
-export function calculateStatistics(results: IAnalysisResult[]): {
+export function calculateStatistics(results: AnalysisResult[]): {
   averageRiskScore: number;
   medianRiskScore: number;
   maxRiskScore: number;
@@ -147,7 +147,7 @@ export function calculateStatistics(results: IAnalysisResult[]): {
  * @returns 一般的なリスクパターン
  */
 export function getCommonRiskPatterns(
-  results: IAnalysisResult[],
+  results: AnalysisResult[],
 ): { pattern: string; count: number; percentage: number }[] {
   const patternCount: { [key: string]: number } = {};
   const totalRecords = results.length;
@@ -173,10 +173,10 @@ export function getCommonRiskPatterns(
  * @param results - 分析結果の配列
  * @returns 時系列リスク分析
  */
-export function analyzeRiskByTime(results: IAnalysisResult[]): {
+export function analyzeRiskByTime(results: AnalysisResult[]): {
   yearlyRiskDistribution: { [year: string]: { [riskLevel: string]: number } };
-  oldestRecords: IAnalysisResult[];
-  newestRecords: IAnalysisResult[];
+  oldestRecords: AnalysisResult[];
+  newestRecords: AnalysisResult[];
 } {
   const yearlyRiskDistribution: {
     [year: string]: { [riskLevel: string]: number };
@@ -203,8 +203,8 @@ export function analyzeRiskByTime(results: IAnalysisResult[]): {
   const recordsWithModified = results.filter(r => r.record.modified);
   const sortedByModified = [...recordsWithModified].sort(
     (a, b) =>
-      new Date(a.record.modified || '').getTime() -
-      new Date(b.record.modified || '').getTime(),
+      new Date(a.record.modified!).getTime() -
+      new Date(b.record.modified!).getTime(),
   );
 
   const oldestRecords = sortedByModified.slice(0, 5);

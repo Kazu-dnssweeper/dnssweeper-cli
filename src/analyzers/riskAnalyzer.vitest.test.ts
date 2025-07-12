@@ -1,4 +1,3 @@
-import { SpyInstance } from "vitest";
 /**
  * riskAnalyzer.ts のユニットテスト（Vitest版）
  */
@@ -12,7 +11,7 @@ import {
   getCommonRiskPatterns,
   analyzeRiskByTime,
 } from './riskAnalyzer';
-import { IAnalysisResult, RiskLevel } from '../types/dns';
+import { AnalysisResult, RiskLevel } from '../types/dns';
 import { createMockDNSRecord } from '../../test/utils/test-helpers';
 
 // モックデータ作成ヘルパー
@@ -22,7 +21,7 @@ const createMockResult = (
   riskLevel: RiskLevel,
   patterns: string[] = [],
   modified: string = '2024-01-01T00:00:00Z',
-): IAnalysisResult => ({
+): AnalysisResult => ({
   record: createMockDNSRecord({
     name,
     type: 'A',
@@ -35,65 +34,82 @@ const createMockResult = (
   riskScore,
   riskLevel,
   reasons: patterns.map(p => `パターンマッチ: ${p}`),
-  matchedPatterns: patterns,
+  patterns,
+  isReservedIP: true,
 });
 
 describe('riskAnalyzer', () => {
   describe('generateAnalysisSummary', () => {
     it('空の結果配列でサマリーを生成できる', () => {
-      const summary = generateAnalysisSummary([], 0);
+      const summary = generateAnalysisSummary([]);
       
       expect(summary).toEqual({
         totalRecords: 0,
-        riskDistribution: {
+        riskLevels: {
           critical: 0,
           high: 0,
           medium: 0,
           low: 0,
-          safe: 0,
         },
-        topRiskyRecords: [],
-        processingTime: 0,
+        stats: {
+          averageRiskScore: 0,
+          recommendedForDeletion: 0,
+          percentageByRisk: {
+            critical: 0,
+            high: 0,
+            medium: 0,
+            low: 0,
+          },
+        },
+        commonPatterns: [],
       });
     });
 
     it('複数の結果から正しいサマリーを生成できる', () => {
-      const results: IAnalysisResult[] = [
+      const results: AnalysisResult[] = [
         createMockResult('test-api', 80, 'critical', ['test']),
         createMockResult('old-service', 65, 'high', ['old']),
         createMockResult('www', 30, 'medium'),
         createMockResult('mail', 10, 'low'),
       ];
 
-      const summary = generateAnalysisSummary(results, 1.5);
+      const summary = generateAnalysisSummary(results);
       
       expect(summary.totalRecords).toBe(4);
-      expect(summary.riskDistribution.critical).toBe(1);
-      expect(summary.riskDistribution.high).toBe(1);
-      expect(summary.riskDistribution.medium).toBe(1);
-      expect(summary.riskDistribution.low).toBe(1);
-      expect(summary.processingTime).toBe(1.5);
-      expect(summary.topRiskyRecords).toHaveLength(4);
+      expect(summary.riskLevels.critical).toBe(1);
+      expect(summary.riskLevels.high).toBe(1);
+      expect(summary.riskLevels.medium).toBe(1);
+      expect(summary.riskLevels.low).toBe(1);
+      expect(summary.stats.averageRiskScore).toBe(46.25);
+      expect(summary.stats.recommendedForDeletion).toBe(2); // critical + high
     });
   });
 
   describe('getRiskLevelColor', () => {
     it.each([
       ['critical', 'red'],
-      ['high', 'redBright'],
-      ['medium', 'yellow'],
-      ['low', 'blue'],
+      ['high', 'yellow'],
+      ['medium', 'blue'],
+      ['low', 'green'],
     ])('リスクレベル %s に対して色 %s を返す', (level, expectedColor) => {
-      const colorInfo = getRiskLevelColor(level as RiskLevel);
-      expect(colorInfo.color).toBe(expectedColor);
-      expect(colorInfo.symbol).toBeDefined();
-      expect(colorInfo.label).toBeDefined();
+      const mockChalk = {
+        red: vi.fn((str: string) => `red(${str})`),
+        yellow: vi.fn((str: string) => `yellow(${str})`),
+        blue: vi.fn((str: string) => `blue(${str})`),
+        green: vi.fn((str: string) => `green(${str})`),
+      };
+
+      // chalkのモックを一時的に置き換え
+      vi.doMock('chalk', () => ({ default: mockChalk }));
+      
+      const color = getRiskLevelColor(level as RiskLevel);
+      expect(color('test')).toContain(expectedColor);
     });
   });
 
   describe('getRecommendedForDeletion', () => {
     it('criticalとhighレベルのレコード数を返す', () => {
-      const results: IAnalysisResult[] = [
+      const results: AnalysisResult[] = [
         createMockResult('test1', 80, 'critical'),
         createMockResult('test2', 65, 'high'),
         createMockResult('test3', 30, 'medium'),
@@ -101,13 +117,13 @@ describe('riskAnalyzer', () => {
         createMockResult('test5', 90, 'critical'),
       ];
 
-      expect(getRecommendedForDeletion(results)).toHaveLength(3);
+      expect(getRecommendedForDeletion(results)).toBe(3);
     });
   });
 
   describe('calculateStatistics', () => {
     it('統計情報を正しく計算する', () => {
-      const results: IAnalysisResult[] = [
+      const results: AnalysisResult[] = [
         createMockResult('test1', 80, 'critical'),
         createMockResult('test2', 60, 'high'),
         createMockResult('test3', 40, 'medium'),
@@ -117,16 +133,17 @@ describe('riskAnalyzer', () => {
       const stats = calculateStatistics(results);
       
       expect(stats.averageRiskScore).toBe(50);
-      expect(stats.medianRiskScore).toBeDefined();
-      expect(stats.maxRiskScore).toBe(80);
-      expect(stats.minRiskScore).toBe(20);
-      expect(stats.riskScoreDistribution).toBeDefined();
+      expect(stats.recommendedForDeletion).toBe(2);
+      expect(stats.percentageByRisk.critical).toBe(25);
+      expect(stats.percentageByRisk.high).toBe(25);
+      expect(stats.percentageByRisk.medium).toBe(25);
+      expect(stats.percentageByRisk.low).toBe(25);
     });
   });
 
   describe('getCommonRiskPatterns', () => {
     it('頻出パターンを正しく抽出する', () => {
-      const results: IAnalysisResult[] = [
+      const results: AnalysisResult[] = [
         createMockResult('test1', 80, 'critical', ['test', 'old']),
         createMockResult('test2', 65, 'high', ['test', 'temp']),
         createMockResult('test3', 30, 'medium', ['test']),
@@ -136,9 +153,9 @@ describe('riskAnalyzer', () => {
       const patterns = getCommonRiskPatterns(results);
       
       expect(patterns).toHaveLength(3);
-      expect(patterns[0]).toEqual({ pattern: 'test', count: 3, percentage: 75 });
-      expect(patterns[1]).toEqual({ pattern: 'old', count: 2, percentage: 50 });
-      expect(patterns[2]).toEqual({ pattern: 'temp', count: 1, percentage: 25 });
+      expect(patterns[0]).toEqual({ pattern: 'test', count: 3 });
+      expect(patterns[1]).toEqual({ pattern: 'old', count: 2 });
+      expect(patterns[2]).toEqual({ pattern: 'temp', count: 1 });
     });
   });
 
@@ -154,7 +171,7 @@ describe('riskAnalyzer', () => {
     });
 
     it('古いレコードに高いリスクスコアを付ける', () => {
-      const results: IAnalysisResult[] = [
+      const results: AnalysisResult[] = [
         createMockResult('recent', 50, 'medium', [], '2023-12-01T00:00:00Z'), // 1ヶ月前
         createMockResult('old', 70, 'high', [], '2023-01-01T00:00:00Z'), // 1年前
         createMockResult('very-old', 90, 'critical', [], '2022-01-01T00:00:00Z'), // 2年前
@@ -162,9 +179,9 @@ describe('riskAnalyzer', () => {
 
       const analysis = analyzeRiskByTime(results);
       
-      expect(analysis.oldestRecords).toHaveLength(3);
-      expect(analysis.newestRecords).toHaveLength(3);
-      expect(analysis.yearlyRiskDistribution).toBeDefined();
+      expect(analysis.averageAge).toBeGreaterThan(0);
+      expect(analysis.oldestRecord?.record.name).toBe('very-old');
+      expect(analysis.staleRecords).toBe(2); // 1年以上古いレコード
     });
   });
 });

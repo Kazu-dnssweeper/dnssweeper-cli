@@ -4,25 +4,54 @@
 
 import { promises as fs } from 'fs';
 import { join } from 'path';
-import { IPatternConfig } from '../types/dns';
+import { PatternConfig } from '../types/dns';
 import { 
+  PatternsConfigSchema,
   checkDuplicatePatterns,
-  type PatternsConfig,
-  PatternsConfigSchema 
+  type PatternsConfig 
 } from '../schemas/pattern.schema';
+import { PatternCache } from './patternCache';
+import { PatternWatcher } from './patternWatcher';
+import { PatternRemoteLoader } from './patternRemoteLoader';
+
+// グローバルキャッシュとウォッチャー
+const patternCache = new PatternCache();
+const patternWatcher = new PatternWatcher();
+const remoteLoader = new PatternRemoteLoader();
 
 /**
  * patterns.jsonファイルを読み込む
  * @param patternFilePath - パターンファイルのパス（省略時はデフォルト）
+ * @param options - 読み込みオプション
  * @returns パターン設定
  */
 export async function loadPatternConfig(
   patternFilePath?: string,
-): Promise<IPatternConfig> {
+  options: {
+    useCache?: boolean;
+    watch?: boolean;
+    forceRefresh?: boolean;
+  } = {}
+): Promise<PatternConfig> {
+  const { useCache = true, watch = false, forceRefresh = false } = options;
+  
   try {
     // デフォルトのパターンファイルパスを設定
     const defaultPatternPath = join(process.cwd(), 'patterns.json');
     const filePath = patternFilePath || defaultPatternPath;
+    
+    // URLの場合はリモートローダーを使用
+    if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
+      return await remoteLoader.loadRemotePattern(filePath, forceRefresh);
+    }
+    
+    // キャッシュから取得を試みる
+    if (useCache && !forceRefresh) {
+      const cached = await patternCache.get(filePath);
+      if (cached) {
+        return cached;
+      }
+    }
 
     // ファイルの存在確認
     await fs.access(filePath);
@@ -46,11 +75,34 @@ export async function loadPatternConfig(
       }
       
       // 新形式から旧形式に変換
-      return convertToLegacyFormat(validatedConfig);
+      const config = convertToLegacyFormat(validatedConfig);
+      
+      // キャッシュに保存
+      if (useCache) {
+        await patternCache.set(filePath, config);
+      }
+      
+      // 監視を開始
+      if (watch) {
+        patternWatcher.watch(filePath);
+      }
+      
+      return config;
     } catch (zodError) {
       // 旧形式の場合は従来のバリデーションを使用
-      const config = rawConfig as IPatternConfig;
+      const config = rawConfig as PatternConfig;
       validatePatternConfig(config);
+      
+      // キャッシュに保存
+      if (useCache) {
+        await patternCache.set(filePath, config);
+      }
+      
+      // 監視を開始
+      if (watch) {
+        patternWatcher.watch(filePath);
+      }
+      
       return config;
     }
   } catch (error) {
@@ -65,7 +117,7 @@ export async function loadPatternConfig(
  * パターン設定のバリデーション
  * @param config - 検証するパターン設定
  */
-function validatePatternConfig(config: IPatternConfig): void {
+function validatePatternConfig(config: PatternConfig): void {
   if (!config.version) {
     throw new Error('バージョン情報が必要です');
   }
@@ -120,7 +172,7 @@ function validatePatternConfig(config: IPatternConfig): void {
  * デフォルトのパターン設定を生成
  * @returns デフォルトのパターン設定
  */
-export function getDefaultPatternConfig(): IPatternConfig {
+export function getDefaultPatternConfig(): PatternConfig {
   return {
     version: '1.0.0',
     description: 'デフォルトDNSレコード判定パターン',
@@ -162,7 +214,7 @@ export function getDefaultPatternConfig(): IPatternConfig {
  * @param config - 新形式のパターン設定
  * @returns 旧形式のパターン設定
  */
-function convertToLegacyFormat(config: PatternsConfig): IPatternConfig {
+function convertToLegacyFormat(config: PatternsConfig): PatternConfig {
   // パターンを重要度別にグループ化
   const prefixes: { high: string[]; medium: string[]; low: string[] } = { high: [], medium: [], low: [] };
   const suffixes: { high: string[]; medium: string[]; low: string[] } = { high: [], medium: [], low: [] };
@@ -208,5 +260,42 @@ function convertToLegacyFormat(config: PatternsConfig): IPatternConfig {
       low: 30,
       safe: 0,
     },
+  };
+}
+
+
+/**
+ * パターン監視インスタンスを取得
+ */
+export function getPatternWatcher(): PatternWatcher {
+  return patternWatcher;
+}
+
+/**
+ * パターンキャッシュをクリア
+ */
+export function clearPatternCache(filePath?: string): void {
+  patternCache.clear(filePath);
+}
+
+/**
+ * リモートパターンのキャッシュをクリア
+ */
+export async function clearRemotePatternCache(): Promise<void> {
+  await remoteLoader.clearCache();
+}
+
+/**
+ * パターン管理の統計情報を取得
+ */
+export async function getPatternStats(): Promise<{
+  cache: { size: number; entries: string[] };
+  watcher: { watchedFiles: number; pendingChanges: number; files: string[] };
+  remote: { cacheDir: string; cachedPatterns: number; totalSize: number };
+}> {
+  return {
+    cache: patternCache.getStats(),
+    watcher: patternWatcher.getStats(),
+    remote: await remoteLoader.getCacheStats(),
   };
 }

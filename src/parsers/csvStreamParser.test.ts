@@ -1,4 +1,3 @@
-import { SpyInstance } from "vitest";
 /**
  * CSVストリーミングパーサーのテスト
  */
@@ -12,7 +11,7 @@ import {
 } from './csvStreamParser';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { IDNSRecord, IAnalysisResult } from '../types/dns';
+import { DNSRecord, AnalysisResult } from '../types/dns';
 import { getDefaultPatternConfig } from '../patterns/patternLoader';
 
 describe('csvStreamParser', () => {
@@ -72,7 +71,7 @@ dev-2.example.com,A,192.168.1.5,300,false,2023-01-01T00:00:00Z,2024-01-01T00:00:
 
   describe('streamProcessRecords', () => {
     it('レコードごとに処理できる', async () => {
-      const processedRecords: IDNSRecord[] = [];
+      const processedRecords: DNSRecord[] = [];
       
       await streamProcessRecords(
         testFile,
@@ -115,7 +114,7 @@ good.example.com,A,192.168.1.3,300,false,2023-01-01T00:00:00Z,2024-01-01T00:00:0
       const invalidFile = path.join(testDataDir, 'invalid.csv');
       await fs.writeFile(invalidFile, invalidCsv);
 
-      const processedRecords: IDNSRecord[] = [];
+      const processedRecords: DNSRecord[] = [];
       
       await streamProcessRecords(
         invalidFile,
@@ -134,7 +133,7 @@ good.example.com,A,192.168.1.3,300,false,2023-01-01T00:00:00Z,2024-01-01T00:00:0
       const patternConfig = getDefaultPatternConfig();
       const processedChunks: number[] = [];
       
-      const processChunk = async (records: IDNSRecord[]): Promise<IAnalysisResult[]> => {
+      const processChunk = async (records: DNSRecord[]): Promise<AnalysisResult[]> => {
         processedChunks.push(records.length);
         return records.map(record => ({
           record,
@@ -158,9 +157,9 @@ good.example.com,A,192.168.1.3,300,false,2023-01-01T00:00:00Z,2024-01-01T00:00:0
 
     it('メモリ制限を監視する', async () => {
       const patternConfig = getDefaultPatternConfig();
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation();
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
       
-      const processChunk = async (records: IDNSRecord[]): Promise<IAnalysisResult[]> => {
+      const processChunk = async (records: DNSRecord[]): Promise<AnalysisResult[]> => {
         return records.map(record => ({
           record,
           riskScore: 50,
@@ -200,7 +199,7 @@ good.example.com,A,192.168.1.3,300,false,2023-01-01T00:00:00Z,2024-01-01T00:00:0
       const patternConfig = getDefaultPatternConfig();
       let totalProcessed = 0;
       
-      const processChunk = async (records: IDNSRecord[]): Promise<IAnalysisResult[]> => {
+      const processChunk = async (records: DNSRecord[]): Promise<AnalysisResult[]> => {
         totalProcessed += records.length;
         return records.map(record => ({
           record,

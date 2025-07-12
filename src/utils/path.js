@@ -86,7 +86,7 @@ class PathUtils {
     if (process.platform === 'win32' && isUNC) {
       // path.normalizeがUNCパスの\\を削除する場合があるため復元
       if (!normalized.startsWith('\\\\')) {
-        normalized = '\\\\' + normalized.replace(/^[\\\/]+/, '');
+        normalized = '\\\\' + normalized.replace(/^[\\/]+/, '');
       }
     }
 
@@ -119,6 +119,7 @@ class PathUtils {
       }
       return true;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error(`Failed to create directory: ${dirPath}`, error);
       return false;
     }
@@ -179,7 +180,7 @@ class PathUtils {
    */
   static sanitizeFilename(filename) {
     // Windowsで無効な文字
-    const invalidChars = /[<>:"|?*\x00-\x1f]/g;
+    const invalidChars = /[<>:"|?*\u0000-\u001f]/g;
 
     // 無効な文字を置換
     let sanitized = filename.replace(invalidChars, '_');
@@ -298,6 +299,7 @@ class PathUtils {
 
       return fs.readFileSync(filePath, encoding);
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.warn(`Failed to read file: ${filePath}`, error.message);
       return null;
     }
@@ -325,6 +327,7 @@ class PathUtils {
       fs.writeFileSync(filePath, content, encoding);
       return true;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error(`Failed to write file: ${filePath}`, error.message);
       return false;
     }
@@ -361,6 +364,7 @@ class PathUtils {
         // 不正な文字をチェック・修正
         return pathString.normalize('NFC');
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.warn('Path encoding normalization failed:', error.message);
         return pathString;
       }

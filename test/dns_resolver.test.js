@@ -1,20 +1,23 @@
+import { vi, describe, test, expect, beforeEach } from 'vitest';
+
+// DNSモジュールをモック
+const mockResolve4 = vi.fn();
+vi.mock('dns', () => ({
+  promises: {
+    resolve4: mockResolve4,
+  },
+}));
+
 const DNSResolver = require('../src/dns_resolver');
 const dns = require('dns').promises;
 const punycode = require('punycode');
-
-// DNSモジュールをモック
-jest.mock('dns', () => ({
-  promises: {
-    resolve4: jest.fn(),
-  },
-}));
 
 describe('DNSResolver', () => {
   let resolver;
 
   beforeEach(() => {
     resolver = new DNSResolver();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     resolver.clearCache();
   });
 
@@ -25,12 +28,12 @@ describe('DNSResolver', () => {
       const mockAddresses = ['192.0.2.1'];
 
       // DNS解決のモック
-      dns.resolve4.mockResolvedValue(mockAddresses);
+      mockResolve4.mockResolvedValue(mockAddresses);
 
       const result = await resolver.resolve(japaneseDomain);
 
       // Punycodeに変換されていることを確認
-      expect(dns.resolve4).toHaveBeenCalledWith(expectedPunycode);
+      expect(mockResolve4).toHaveBeenCalledWith(expectedPunycode);
 
       // 結果の検証
       expect(result).toEqual({
@@ -47,11 +50,11 @@ describe('DNSResolver', () => {
       const expectedPunycode = 'xn--fiqs8s.xn--fiqs8s';
       const mockAddresses = ['192.0.2.2'];
 
-      dns.resolve4.mockResolvedValue(mockAddresses);
+      mockResolve4.mockResolvedValue(mockAddresses);
 
       const result = await resolver.resolve(chineseDomain);
 
-      expect(dns.resolve4).toHaveBeenCalledWith(expectedPunycode);
+      expect(mockResolve4).toHaveBeenCalledWith(expectedPunycode);
       expect(result.asciiDomain).toBe(expectedPunycode);
       expect(result.resolved).toBe(true);
     });
@@ -61,11 +64,11 @@ describe('DNSResolver', () => {
       const expectedPunycode = 'xn--e1afmkfd.xn--p1ai';
       const mockAddresses = ['192.0.2.3'];
 
-      dns.resolve4.mockResolvedValue(mockAddresses);
+      mockResolve4.mockResolvedValue(mockAddresses);
 
       const result = await resolver.resolve(russianDomain);
 
-      expect(dns.resolve4).toHaveBeenCalledWith(expectedPunycode);
+      expect(mockResolve4).toHaveBeenCalledWith(expectedPunycode);
       expect(result.asciiDomain).toBe(expectedPunycode);
       expect(result.resolved).toBe(true);
     });
@@ -74,11 +77,11 @@ describe('DNSResolver', () => {
       const asciiDomain = 'example.com';
       const mockAddresses = ['192.0.2.4'];
 
-      dns.resolve4.mockResolvedValue(mockAddresses);
+      mockResolve4.mockResolvedValue(mockAddresses);
 
       const result = await resolver.resolve(asciiDomain);
 
-      expect(dns.resolve4).toHaveBeenCalledWith(asciiDomain);
+      expect(mockResolve4).toHaveBeenCalledWith(asciiDomain);
       expect(result.asciiDomain).toBe(asciiDomain);
       expect(result.resolved).toBe(true);
     });
@@ -89,7 +92,7 @@ describe('DNSResolver', () => {
       const domain = '日本.jp';
       const errorMessage = 'ENOTFOUND';
 
-      dns.resolve4.mockRejectedValue(new Error(errorMessage));
+      mockResolve4.mockRejectedValue(new Error(errorMessage));
 
       const result = await resolver.resolve(domain);
 
@@ -107,7 +110,7 @@ describe('DNSResolver', () => {
       const domain = 'example.com';
 
       // 6秒後に解決するように設定（タイムアウトは5秒）
-      dns.resolve4.mockImplementation(
+      mockResolve4.mockImplementation(
         () =>
           new Promise((resolve) =>
             setTimeout(() => resolve(['192.0.2.1']), 6000)
@@ -126,7 +129,7 @@ describe('DNSResolver', () => {
       const domain = '日本.jp';
       const mockAddresses = ['192.0.2.1'];
 
-      dns.resolve4.mockResolvedValue(mockAddresses);
+      mockResolve4.mockResolvedValue(mockAddresses);
 
       // 1回目の解決
       const result1 = await resolver.resolve(domain);
@@ -134,7 +137,7 @@ describe('DNSResolver', () => {
       const result2 = await resolver.resolve(domain);
 
       // DNS解決は1回だけ呼ばれる
-      expect(dns.resolve4).toHaveBeenCalledTimes(1);
+      expect(mockResolve4).toHaveBeenCalledTimes(1);
 
       // 結果は同じ
       expect(result1).toEqual(result2);
@@ -144,7 +147,7 @@ describe('DNSResolver', () => {
       const domain = 'example.com';
       const mockAddresses = ['192.0.2.1'];
 
-      dns.resolve4.mockResolvedValue(mockAddresses);
+      mockResolve4.mockResolvedValue(mockAddresses);
 
       // 1回目の解決
       await resolver.resolve(domain);
@@ -156,7 +159,7 @@ describe('DNSResolver', () => {
       await resolver.resolve(domain);
 
       // DNS解決は2回呼ばれる
-      expect(dns.resolve4).toHaveBeenCalledTimes(2);
+      expect(mockResolve4).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -165,7 +168,7 @@ describe('DNSResolver', () => {
       const domains = ['日本.jp', '中国.中国', 'example.com'];
       const mockResults = [['192.0.2.1'], ['192.0.2.2'], ['192.0.2.3']];
 
-      dns.resolve4
+      mockResolve4
         .mockResolvedValueOnce(mockResults[0])
         .mockResolvedValueOnce(mockResults[1])
         .mockResolvedValueOnce(mockResults[2]);

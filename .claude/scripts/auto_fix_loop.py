@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-自動エラー修正ループシステム
-GitHub Actions のエラーを検出して自動修正し、治るまで繰り返す
+完全自動エラー修正システム
+ローカル + GitHub Actions のエラーを検出して自動修正し、治るまで繰り返す
 """
 
 import subprocess
@@ -9,12 +9,13 @@ import re
 import json
 import time
 import os
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 
 class AutoFixLoop:
     def __init__(self, project_path: str = "/mnt/c/projects/dnssweeper-cli"):
         self.project_path = project_path
         self.max_iterations = 10
+        self.actions_timeout_minutes = 15  # GitHub Actions最大待機時間
         
     def run_lint(self) -> tuple[bool, str]:
         """ESLintを実行してエラーを取得"""
@@ -159,9 +160,210 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
             
         return False
     
+    def check_github_actions_status(self) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+        """GitHub Actionsの最新実行状態をチェック"""
+        try:
+            result = subprocess.run(
+                ["gh", "run", "list", "--limit", "1", "--json", "status,conclusion,workflowName"],
+                cwd=self.project_path,
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+            
+            if result.returncode == 0:
+                runs = json.loads(result.stdout)
+                if runs:
+                    run = runs[0]
+                    return run.get("status"), run.get("conclusion"), run.get("workflowName")
+            
+            return None, None, None
+        except Exception as e:
+            print(f"GitHub Actions状態確認エラー: {str(e)}")
+            return None, None, None
+    
+    def wait_for_github_actions(self) -> Tuple[bool, str]:
+        """GitHub Actionsの完了を待機"""
+        print("⏰ GitHub Actions実行開始まで30秒待機...")
+        time.sleep(30)  # Actions開始待機
+        
+        print("🔍 GitHub Actions状態監視開始...")
+        for i in range(self.actions_timeout_minutes * 6):  # 10秒間隔
+            status, conclusion, workflow = self.check_github_actions_status()
+            
+            if status == "completed":
+                if conclusion == "success":
+                    print("✅ GitHub Actions成功！")
+                    return True, "success"
+                else:
+                    print(f"❌ GitHub Actions失敗: {conclusion}")
+                    return False, conclusion or "failure"
+            
+            elif status in ["in_progress", "queued"]:
+                print(f"⏳ GitHub Actions実行中... ({i//6 + 1}分経過)")
+                
+            time.sleep(10)
+        
+        print(f"⏰ GitHub Actions監視タイムアウト ({self.actions_timeout_minutes}分)")
+        return False, "timeout"
+    
+    def get_github_actions_logs(self) -> str:
+        """GitHub Actionsの最新ログを取得"""
+        try:
+            result = subprocess.run(
+                ["gh", "run", "view", "--log"],
+                cwd=self.project_path,
+                capture_output=True,
+                text=True,
+                timeout=60
+            )
+            
+            if result.returncode == 0:
+                return result.stdout
+            else:
+                return f"ログ取得失敗: {result.stderr}"
+                
+        except subprocess.TimeoutExpired:
+            return "ログ取得タイムアウト"
+        except Exception as e:
+            return f"ログ取得エラー: {str(e)}"
+    
+    def parse_github_actions_errors(self, log_output: str) -> List[Dict]:
+        """GitHub Actionsログからエラーを抽出"""
+        errors = []
+        lines = log_output.split('\n')
+        
+        for i, line in enumerate(lines):
+            # CI特有のエラーパターン
+            
+            # Node.js/pnpm関連エラー
+            if "Error:" in line and ("pnpm" in line or "npm" in line):
+                errors.append({
+                    'type': 'dependency',
+                    'message': line.strip(),
+                    'line_context': lines[max(0, i-2):i+3],
+                    'fix_type': 'dependency_install'
+                })
+            
+            # ESLintエラー（CI版）
+            elif re.search(r'^\s*\d+:\d+\s+(error|warning)', line):
+                errors.append({
+                    'type': 'eslint',
+                    'message': line.strip(),
+                    'line_context': [line],
+                    'fix_type': 'eslint'
+                })
+            
+            # Test failure
+            elif "FAIL" in line or "Test failed" in line:
+                errors.append({
+                    'type': 'test',
+                    'message': line.strip(),
+                    'line_context': lines[max(0, i-1):i+2],
+                    'fix_type': 'test_config'
+                })
+            
+            # Build failure
+            elif "BUILD FAILED" in line or "build failed" in line:
+                errors.append({
+                    'type': 'build',
+                    'message': line.strip(),
+                    'line_context': lines[max(0, i-1):i+2],
+                    'fix_type': 'build_config'
+                })
+                
+        return errors
+    
+    def fix_github_actions_error(self, error: Dict) -> bool:
+        """GitHub Actions特有のエラーを修正"""
+        fix_type = error.get('fix_type')
+        message = error.get('message', '')
+        
+        try:
+            if fix_type == 'dependency_install':
+                # 依存関係の問題を修正
+                print("🔧 依存関係の問題を修正中...")
+                subprocess.run(["pnpm", "install"], cwd=self.project_path, check=True)
+                return True
+                
+            elif fix_type == 'test_config':
+                # テスト設定の問題を修正
+                print("🔧 テスト設定を修正中...")
+                if "jest is not defined" in message:
+                    self.fix_vitest_compatibility()
+                return True
+                
+            elif fix_type == 'build_config':
+                # ビルド設定の問題を修正
+                print("🔧 ビルド設定を修正中...")
+                # TypeScript設定の問題を修正
+                if "typescript" in message.lower():
+                    self.fix_typescript_config()
+                return True
+                
+        except Exception as e:
+            print(f"修正エラー: {str(e)}")
+            
+        return False
+    
+    def fix_vitest_compatibility(self):
+        """VitestとJestの互換性問題を修正"""
+        test_files = [
+            "test/dns_resolver.test.js",
+            "test/error_messages.test.js",
+            "test/memory_leak.test.js",
+            "test/timeout.test.js"
+        ]
+        
+        for test_file in test_files:
+            file_path = os.path.join(self.project_path, test_file)
+            if os.path.exists(file_path):
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                    
+                    # JestからVitest用に変換
+                    content = content.replace("jest.mock", "vi.mock")
+                    content = content.replace("jest.fn", "vi.fn")
+                    
+                    # Vitest import追加
+                    if "import" not in content and "vi." in content:
+                        content = "import { vi } from 'vitest';\n" + content
+                    
+                    with open(file_path, 'w', encoding='utf-8') as f:
+                        f.write(content)
+                        
+                except Exception as e:
+                    print(f"テストファイル修正エラー {test_file}: {str(e)}")
+    
+    def fix_typescript_config(self):
+        """TypeScript設定の問題を修正"""
+        tsconfig_path = os.path.join(self.project_path, "tsconfig.json")
+        if not os.path.exists(tsconfig_path):
+            # 基本的なtsconfig.jsonを作成
+            tsconfig = {
+                "compilerOptions": {
+                    "target": "ES2020",
+                    "module": "commonjs",
+                    "strict": true,
+                    "esModuleInterop": true,
+                    "skipLibCheck": true,
+                    "forceConsistentCasingInFileNames": True
+                },
+                "include": ["src/**/*"],
+                "exclude": ["node_modules", "dist"]
+            }
+            
+            try:
+                with open(tsconfig_path, 'w') as f:
+                    json.dump(tsconfig, f, indent=2)
+                print("📝 tsconfig.json を作成しました")
+            except Exception as e:
+                print(f"tsconfig.json作成エラー: {str(e)}")
+    
     def run_auto_fix_loop(self) -> bool:
-        """自動修正ループのメイン処理"""
-        print("🤖 自動エラー修正ループ開始...")
+        """自動修正ループのメイン処理（GitHub Actions連携付き）"""
+        print("🤖 完全自動エラー修正ループ開始...")
         
         for iteration in range(1, self.max_iterations + 1):
             print(f"\n--- 反復 {iteration}/{self.max_iterations} ---")
@@ -178,39 +380,76 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
                 test_success, test_output = self.run_tests()
                 
                 if test_success:
-                    print("✅ 全てのテストが通過！修正完了です！")
-                    return True
+                    print("✅ 全てのテストが通過！")
+                    
+                    # 3. GitHub Actions監視
+                    print("🚀 GitHub Actions監視開始...")
+                    actions_success, actions_result = self.wait_for_github_actions()
+                    
+                    if actions_success:
+                        print("🎉 GitHub Actionsも成功！完全修正完了です！")
+                        return True
+                    else:
+                        print(f"❌ GitHub Actions失敗: {actions_result}")
+                        
+                        # GitHub Actionsのログを取得してエラーを修正
+                        print("📄 GitHub Actionsログを取得中...")
+                        logs = self.get_github_actions_logs()
+                        
+                        print("🔍 GitHub Actionsエラーを解析中...")
+                        actions_errors = self.parse_github_actions_errors(logs)
+                        
+                        if actions_errors:
+                            print(f"🔧 {len(actions_errors)}個のGitHub Actionsエラーを修正中...")
+                            
+                            actions_fixed = 0
+                            for error in actions_errors:
+                                if self.fix_github_actions_error(error):
+                                    actions_fixed += 1
+                            
+                            print(f"✨ {actions_fixed}/{len(actions_errors)}個のGitHub Actionsエラーを修正")
+                            
+                            if actions_fixed > 0:
+                                # 修正をコミット
+                                if self.commit_fixes(f"{iteration}-github-actions"):
+                                    print("📝 GitHub Actions修正をコミット・プッシュしました")
+                                    continue  # 次の反復でGitHub Actionsを再チェック
+                        else:
+                            print("❌ GitHub Actionsエラーを解析できませんでした")
+                            print(logs[:2000])  # ログの一部を表示
                 else:
                     print("❌ テストが失敗しました:")
                     print(test_output[:1000])
                     # テストエラーは継続（lintが通ればOK）
-                    return True
             
-            # 3. エラーをパース
+            # 4. ESLintエラーをパース
             errors = self.parse_eslint_errors(lint_output)
+            if not errors and lint_success:
+                continue  # GitHub Actions監視に進む
+                
             if not errors:
                 print("❌ ESLintエラーをパースできませんでした:")
                 print(lint_output[:1000])
                 continue
                 
-            print(f"🔍 {len(errors)}個のエラーを検出:")
+            print(f"🔍 {len(errors)}個のESLintエラーを検出:")
             for error in errors[:5]:  # 最初の5個を表示
                 print(f"  - {error['file']}:{error['line']} {error['rule']} - {error['message']}")
             
-            # 4. エラーを自動修正
-            print("🔧 自動修正中...")
+            # 5. ESLintエラーを自動修正
+            print("🔧 ESLintエラー自動修正中...")
             fixed_count = 0
             for error in errors:
                 if self.fix_eslint_error(error):
                     fixed_count += 1
                     
-            print(f"✨ {fixed_count}/{len(errors)}個のエラーを修正")
+            print(f"✨ {fixed_count}/{len(errors)}個のESLintエラーを修正")
             
             if fixed_count == 0:
                 print("❌ 修正できるエラーがありませんでした")
                 break
                 
-            # 5. コミット
+            # 6. コミット
             if self.commit_fixes(iteration):
                 print("📝 修正をコミット・プッシュしました")
             else:

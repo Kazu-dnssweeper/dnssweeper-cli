@@ -1,0 +1,51 @@
+{
+  "phase_3_tasks": {
+    "\u30d0\u30b0\u4fee\u6b63": {
+      "target": 10,
+      "completed": 1,
+      "status": "\ud83d\udd34"
+    },
+    "\u30c6\u30b9\u30c8\u30ab\u30d0\u30ec\u30c3\u30b8\u5411\u4e0a": {
+      "target": 80,
+      "completed": 4,
+      "status": "\ud83d\udd34"
+    },
+    "\u30c9\u30ad\u30e5\u30e1\u30f3\u30c8\u6539\u5584": {
+      "target": 5,
+      "completed": 0,
+      "status": "\ud83d\udd34"
+    },
+    "\u30d1\u30d5\u30a9\u30fc\u30de\u30f3\u30b9\u6700\u9069\u5316": {
+      "target": 5,
+      "completed": 0,
+      "status": "\ud83d\udd34"
+    },
+    "\u30bb\u30ad\u30e5\u30ea\u30c6\u30a3\u5f37\u5316": {
+      "target": 3,
+      "completed": 0,
+      "status": "\ud83d\udd34"
+    },
+    "\u30b3\u30fc\u30c9\u6700\u9069\u5316": {
+      "target": 5,
+      "completed": 1,
+      "status": "\ud83d\udd34"
+    }
+  },
+  "milestones": {
+    "CLI\u7248v0.2.0\u30ea\u30ea\u30fc\u30b9": {
+      "target_date": "2025-08-01",
+      "status": "pending"
+    },
+    "\u30d5\u30a3\u30fc\u30c9\u30d0\u30c3\u30af\u53ce\u96c6": {
+      "target_count": 50,
+      "current": 0,
+      "status": "pending"
+    },
+    "\u5b89\u5b9a\u6027\u5411\u4e0a": {
+      "error_rate_target": 0.01,
+      "current": 0.049,
+      "status": "pending"
+    }
+  },
+  "last_update": "2025-07-13T00:20:04.516068"
+}

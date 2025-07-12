@@ -1,3 +1,5 @@
+import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest';
+
 const {
   ParallelChecker,
   createParallelChecker,
@@ -130,7 +132,7 @@ describe('メモリリーク対策のテスト', () => {
     let currentConcurrent = 0;
 
     // モックネットワーククライアント
-    checker.checkSingleDomain = jest.fn(async (domain) => {
+    checker.checkSingleDomain = vi.fn(async (domain) => {
       currentConcurrent++;
       maxConcurrent = Math.max(maxConcurrent, currentConcurrent);
 
@@ -153,7 +155,7 @@ describe('メモリリーク対策のテスト', () => {
     const originalDebug = process.env.DEBUG;
     process.env.DEBUG = 'true';
 
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     checker.logMemoryUsage();
 

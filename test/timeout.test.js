@@ -1,3 +1,5 @@
+import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest';
+
 const { NetworkClient } = require('../src/network');
 const config = require('../src/config');
 

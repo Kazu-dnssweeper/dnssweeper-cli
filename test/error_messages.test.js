@@ -1,3 +1,5 @@
+import { vi, describe, test, expect } from 'vitest';
+
 const {
   DnsSweeperError,
   NetworkError,
@@ -81,7 +83,7 @@ describe('エラーメッセージの日本語化テスト', () => {
   });
 
   test('handleError関数がDnsSweeperErrorを適切に処理する', () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const error = new NetworkError('Test', 'ENOTFOUND', { domain: 'test.com' });
     handleError(error);
@@ -91,7 +93,7 @@ describe('エラーメッセージの日本語化テスト', () => {
   });
 
   test('handleError関数がNode.jsの標準エラーを変換する', () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const nodeError = new Error('getaddrinfo ENOTFOUND example.com');
     nodeError.code = 'ENOTFOUND';
@@ -105,7 +107,7 @@ describe('エラーメッセージの日本語化テスト', () => {
   });
 
   test('handleError関数が予期しないエラーを処理する', () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const unknownError = new Error('Something went wrong');
     handleError(unknownError);

@@ -30,9 +30,9 @@ describe('エラーメッセージの日本語化テスト', () => {
     });
 
     const message = error.toUserFriendlyMessage();
-    expect(message).toContain('リクエストがタイムアウトしました');
-    expect(message).toContain('--timeout オプションで時間を延長してください');
-    expect(message).toContain('例: dns-sweep check example.com --timeout 10');
+    expect(message).toContain('DNS解決がタイムアウトしました');
+    expect(message).toContain('タイムアウト時間を延長 (--timeout 15)');
+    expect(message).toContain('例: dns-sweep check example.com --timeout 15');
   });
 
   test('UNSUPPORTED_TYPEエラーが日本語で表示される', () => {

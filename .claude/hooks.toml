@@ -1,0 +1,44 @@
+# 自動化フックの設定
+
+[[hooks]]
+event = "PostToolUse"
+run_in_background = true
+[hooks.matcher]
+tool_name = "edit_file"
+file_paths = ["*.py"]
+command = """
+echo "[$(date)] Pythonファイル編集: $CLAUDE_FILE_PATHS" >> .claude/logs/activity.log
+python -m black $CLAUDE_FILE_PATHS 2>/dev/null || true
+python -m pytest --tb=short 2>/dev/null || echo "テスト未実装"
+"""
+
+[[hooks]]
+event = "PostToolUse"
+[hooks.matcher]
+tool_name = "edit_file"
+file_paths = ["*.js", "*.ts"]
+command = """
+echo "[$(date)] JS/TSファイル編集: $CLAUDE_FILE_PATHS" >> .claude/logs/activity.log
+npx prettier --write $CLAUDE_FILE_PATHS 2>/dev/null || true
+npx eslint --fix $CLAUDE_FILE_PATHS 2>/dev/null || true
+"""
+
+[[hooks]]
+event = "PostToolUse"
+[hooks.matcher]
+tool_name = "create_file"
+command = """
+echo "[$(date)] 新規ファイル作成: $CLAUDE_FILE_PATHS" >> .claude/logs/activity.log
+git add $CLAUDE_FILE_PATHS 2>/dev/null || true
+"""
+
+[[hooks]]
+event = "PostToolUse"
+run_in_background = true
+[hooks.matcher]
+tool_name = "run_command"
+command = """
+echo "[$(date)] コマンド実行完了" >> .claude/logs/activity.log
+# パフォーマンスメトリクスを記録
+echo "{\"timestamp\": \"$(date -Iseconds)\", \"event\": \"command_executed\"}" >> .claude/memory/metrics.jsonl
+"""

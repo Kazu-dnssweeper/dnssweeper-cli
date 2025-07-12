@@ -1,6 +1,0 @@
-Name,Type,TTL,Value
-@,A,3600,192.168.1.1
-www,CNAME,3600,example.com
-mail,A,3600,192.168.1.10
-test,A,3600,192.168.1.2
-old-dev,A,3600,192.168.1.3

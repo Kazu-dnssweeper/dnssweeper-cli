@@ -1,0 +1,22 @@
+{
+    "systemName": "Claude Autonomous Evolution System",
+    "version": "1.0.0",
+    "allowedTools": ["*"],
+    "maxOutputCharacters": 500000,
+    "timeoutSeconds": 1200,
+    "autoAcceptWarnings": true,
+    "enableParallelExecution": true,
+    "evolutionEnabled": true,
+    "operationMode": "production",
+    "simulationMode": false,
+    "targetProject": "dnssweeper-cli",
+    "features": {
+        "selfModification": true,
+        "geneticAlgorithm": true,
+        "realTimeAdaptation": true,
+        "autoML": true,
+        "continuousLearning": true,
+        "realCodeGeneration": true,
+        "actualFileModification": true
+    }
+}

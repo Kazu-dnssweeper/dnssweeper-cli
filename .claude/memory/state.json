@@ -1,0 +1,79 @@
+{
+  "generation": 1,
+  "last_update": "2025-07-12T23:08:07.882398",
+  "performance_history": [
+    {
+      "task_type": "\u30c6\u30b9\u30c8\u4f5c\u6210",
+      "success": true,
+      "execution_time": 0.14510154724121094,
+      "timestamp": "2025-07-12T23:08:02.807192",
+      "generation": 1,
+      "strategy_used": {
+        "generation": 1,
+        "mutation_rate": 0.2,
+        "exploration_rate": 0.5,
+        "parallel_agents": 3,
+        "batch_size": 5,
+        "timeout_seconds": 255,
+        "retry_strategy": "exponential",
+        "performance": 0.5
+      },
+      "error_message": ""
+    },
+    {
+      "task_type": "\u30d0\u30b0\u4fee\u6b63",
+      "success": true,
+      "execution_time": 3.0338001251220703,
+      "timestamp": "2025-07-12T23:08:05.864781",
+      "generation": 1,
+      "strategy_used": {
+        "generation": 1,
+        "mutation_rate": 0.2,
+        "exploration_rate": 0.5,
+        "parallel_agents": 3,
+        "batch_size": 5,
+        "timeout_seconds": 255,
+        "retry_strategy": "exponential",
+        "performance": 0.5
+      },
+      "error_message": ""
+    },
+    {
+      "task_type": "\u30b3\u30fc\u30c9\u6700\u9069\u5316",
+      "success": true,
+      "execution_time": 1.929858922958374,
+      "timestamp": "2025-07-12T23:08:07.833573",
+      "generation": 1,
+      "strategy_used": {
+        "generation": 1,
+        "mutation_rate": 0.2,
+        "exploration_rate": 0.5,
+        "parallel_agents": 3,
+        "batch_size": 5,
+        "timeout_seconds": 255,
+        "retry_strategy": "exponential",
+        "performance": 0.5
+      },
+      "error_message": ""
+    }
+  ],
+  "current_fitness": 0.8732970798015594,
+  "strategies": [
+    {
+      "generation": 1,
+      "mutation_rate": 0.2,
+      "exploration_rate": 0.5,
+      "parallel_agents": 3,
+      "batch_size": 5,
+      "timeout_seconds": 255,
+      "retry_strategy": "exponential",
+      "performance": 0.5
+    }
+  ],
+  "evolution_interval": 10,
+  "statistics": {
+    "total_tasks_executed": 3,
+    "success_rate": 1.0,
+    "average_execution_time": 1.7029201984405518
+  }
+}
